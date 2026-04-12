@@ -1,0 +1,14 @@
+{
+  "name": "izakaya",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=packages/backend",
+    "dev:frontend": "npm run dev --workspace=packages/frontend"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
