@@ -11,7 +11,6 @@ const HEALTH_COLORS: Record<string, THREE.Color> = {
 };
 
 const TOWER_COLOR = new THREE.Color('#3B4A5C');
-const CYAN_EMISSIVE = new THREE.Color('#06b6d4');
 
 // Thermal coloring based on coolant supply temperature
 function getCoolantThermalEmissive(temp: number): { color: THREE.Color; intensity: number } {
@@ -30,9 +29,7 @@ function SingleTower({ position }: { position: [number, number, number] }) {
 
   useFrame(({ clock }) => {
     if (!fanRef.current) return;
-    const store = useDashboardStore.getState();
-    const state = store.simulationState;
-    const selectedComponent = store.selectedHealthComponent;
+    const state = useDashboardStore.getState().simulationState;
 
     const fanSpeed = state.layers.cooling.levers.fanSpeedOverride;
     fanRef.current.rotation.y += fanSpeed * 0.1;
@@ -43,13 +40,8 @@ function SingleTower({ position }: { position: [number, number, number] }) {
     if (bodyRef.current) {
       const mat = bodyRef.current.material as THREE.MeshStandardMaterial;
 
-      if (selectedComponent === 'cooling') {
-        // Priority 1: health component highlight — cyan glow
-        const pulse = (Math.sin(clock.getElapsedTime() * 2) + 1) / 2;
-        mat.emissive.copy(CYAN_EMISSIVE);
-        mat.emissiveIntensity = THREE.MathUtils.lerp(1.0, 1.6, pulse);
-      } else {
-        // Priority 2: thermal coloring based on coolant temp
+      {
+        // Thermal coloring based on coolant temp
         const thermal = getCoolantThermalEmissive(coolantTemp);
         const target = HEALTH_COLORS[health] || HEALTH_COLORS.healthy;
         currentColor.current.lerp(target, 0.05);
@@ -62,6 +54,7 @@ function SingleTower({ position }: { position: [number, number, number] }) {
   return (
     <group
       position={position}
+      onClick={(e) => { e.stopPropagation(); const s = useDashboardStore.getState(); s.setSelectedHealthComponent('cooling'); s.selectLayer('cooling'); }}
       onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
       onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
     >

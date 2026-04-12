@@ -13,27 +13,25 @@ function SinglePDU({ position }: { position: [number, number, number] }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const currentColor = useRef(new THREE.Color('#22C55E'));
 
-  useFrame(({ clock }) => {
+  useFrame(() => {
     if (!meshRef.current) return;
-    const store = useDashboardStore.getState();
-    const selectedComponent = store.selectedHealthComponent;
-    const health = store.simulationState.layers.power.health;
+    const health = useDashboardStore.getState().simulationState.layers.power.health;
     const mat = meshRef.current.material as THREE.MeshStandardMaterial;
 
-    if (selectedComponent === 'power') {
-      const pulse = (Math.sin(clock.getElapsedTime() * 2) + 1) / 2;
-      mat.emissive.set('#06b6d4');
-      mat.emissiveIntensity = THREE.MathUtils.lerp(1.0, 1.6, pulse);
-    } else {
-      const target = HEALTH_COLORS[health] || HEALTH_COLORS.healthy;
-      currentColor.current.lerp(target, 0.05);
-      mat.emissive.copy(currentColor.current);
-      mat.emissiveIntensity = 0.15;
-    }
+    const target = HEALTH_COLORS[health] || HEALTH_COLORS.healthy;
+    currentColor.current.lerp(target, 0.05);
+    mat.emissive.copy(currentColor.current);
+    mat.emissiveIntensity = 0.15;
   });
 
   return (
-    <mesh ref={meshRef} position={position}>
+    <mesh
+      ref={meshRef}
+      position={position}
+      onClick={(e) => { e.stopPropagation(); const s = useDashboardStore.getState(); s.setSelectedHealthComponent('power'); s.selectLayer('power'); }}
+      onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { document.body.style.cursor = 'default'; }}
+    >
       <boxGeometry args={[1, 2.5, 0.6]} />
       <meshStandardMaterial color="#2E3B4E" metalness={0.5} roughness={0.5} />
     </mesh>

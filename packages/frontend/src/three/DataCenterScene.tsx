@@ -8,6 +8,7 @@ import { DataFlow } from './DataFlow';
 import { HeatHaze } from './effects/HeatHaze';
 import { WaterParticles } from './effects/WaterParticles';
 import { ElectricArcs } from './effects/ElectricArc';
+import { useDashboardStore } from '../store/useDashboardStore';
 
 export function DataCenterScene() {
   return (
@@ -24,8 +25,9 @@ export function DataCenterScene() {
       <directionalLight position={[-4, 8, -3]} intensity={0.6} />
       <directionalLight position={[3, 4, -6]} intensity={0.4} />
 
-      {/* Ground plane */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
+      {/* Ground plane — click to select Location layer */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}
+        onClick={() => { const s = useDashboardStore.getState(); s.setSelectedHealthComponent('location'); s.selectLayer('location'); }}>
         <planeGeometry args={[50, 50]} />
         <meshStandardMaterial color="#8f8f87" roughness={0.95} />
       </mesh>

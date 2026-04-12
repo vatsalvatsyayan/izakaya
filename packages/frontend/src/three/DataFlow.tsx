@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useDashboardStore } from '../store/useDashboardStore';
@@ -77,15 +77,26 @@ export function DataFlow() {
     if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
   });
 
+  const handleClick = useCallback((e: THREE.Event) => {
+    e.stopPropagation();
+    const s = useDashboardStore.getState();
+    s.setSelectedHealthComponent('workload');
+    s.selectLayer('workload');
+  }, []);
+
   return (
     <group>
       {/* Ingress sphere */}
-      <mesh position={INGRESS_POS.toArray()}>
+      <mesh position={INGRESS_POS.toArray()} onClick={handleClick}
+        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { document.body.style.cursor = 'default'; }}>
         <sphereGeometry args={[0.5, 16, 16]} />
         <meshStandardMaterial color="#3B82F6" emissive="#3B82F6" emissiveIntensity={0.3} metalness={0.2} roughness={0.8} />
       </mesh>
       {/* Egress sphere */}
-      <mesh position={EGRESS_POS.toArray()}>
+      <mesh position={EGRESS_POS.toArray()} onClick={handleClick}
+        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+        onPointerOut={() => { document.body.style.cursor = 'default'; }}>
         <sphereGeometry args={[0.5, 16, 16]} />
         <meshStandardMaterial color="#8B5CF6" emissive="#8B5CF6" emissiveIntensity={0.3} metalness={0.2} roughness={0.8} />
       </mesh>

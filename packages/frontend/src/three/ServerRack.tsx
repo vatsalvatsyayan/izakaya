@@ -17,7 +17,6 @@ const PULSE_SPEEDS: Record<string, number> = {
 };
 
 const RACK_COLOR = new THREE.Color('#2A3042');
-const CYAN_EMISSIVE = new THREE.Color('#06b6d4');
 
 // Returns thermal emissive color+intensity based on GPU temperature
 function getThermalEmissive(temp: number): { color: THREE.Color; intensity: number } {
@@ -37,9 +36,7 @@ function SingleRack({ position, index }: { position: [number, number, number]; i
 
   useFrame(({ clock }) => {
     // Always use .getState() inside useFrame — never call hooks here
-    const store = useDashboardStore.getState();
-    const state = store.simulationState;
-    const selectedComponent = store.selectedHealthComponent;
+    const state = useDashboardStore.getState().simulationState;
     const isShutdown = state.layers.gpu.levers.gracefulRackShutdown[index];
     const health = state.layers.gpu.health;
     const gpuTemp = state.layers.gpu.averageGpuTemperature;
@@ -47,13 +44,7 @@ function SingleRack({ position, index }: { position: [number, number, number]; i
     if (bodyRef.current) {
       const bodyMat = bodyRef.current.material as THREE.MeshStandardMaterial;
 
-      if (selectedComponent === 'gpu') {
-        // Priority 1: health component selection — cyan pulse glow
-        const pulse = (Math.sin(clock.getElapsedTime() * 2) + 1) / 2;
-        bodyMat.emissive.copy(CYAN_EMISSIVE);
-        bodyMat.emissiveIntensity = THREE.MathUtils.lerp(1.2, 1.8, pulse);
-        bodyMat.opacity = THREE.MathUtils.lerp(bodyMat.opacity, 1, 0.02);
-      } else if (isShutdown) {
+      if (isShutdown) {
         // Priority 2: rack is shut down — fade to dark
         bodyMat.emissive.set('#000000');
         bodyMat.emissiveIntensity = 0;
@@ -89,6 +80,7 @@ function SingleRack({ position, index }: { position: [number, number, number]; i
   return (
     <group
       position={position}
+      onClick={(e) => { e.stopPropagation(); const s = useDashboardStore.getState(); s.setSelectedHealthComponent('gpu'); s.selectLayer('gpu'); }}
       onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
       onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
     >

@@ -9,6 +9,7 @@ import { AlertToast } from './components/AlertToast';
 import { TradeoffModal } from './components/TradeoffModal';
 import { ToastContainer } from './components/Toast';
 import { DataCenterScene } from './three/DataCenterScene';
+import { ComponentDetailPanel } from './components/ComponentDetailPanel';
 
 export default function App() {
   useSimulationSocket();
@@ -37,6 +38,7 @@ export default function App() {
           {/* Right: Panel system */}
           <div className="w-[45%] flex flex-col border-l border-[#2d3148] bg-[#1e2133] overflow-hidden">
             <HealthBreakdown />
+            <ComponentDetailPanel />
             <ScenarioProgressBar />
             <TabContainer />
           </div>
