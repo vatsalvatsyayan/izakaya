@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import type { SimulationEngine } from '../simulation/engine';
 import { LEVER_DEFINITIONS } from '@izakaya/shared';
+import { persistActionToS3 } from '../aws/s3AuditLogger';
+import { emitActionCommitMetric } from '../aws/cloudWatchEmitter';
 
 const VALID_LAYERS = ['power', 'cooling', 'gpu', 'workload', 'location'];
 const BOOLEAN_LEVERS = ['renewablePriorityMode', 'waterRecirculationMode'];
@@ -50,6 +52,16 @@ export function createActionsController(engine: SimulationEngine): Router {
     }
 
     const response = engine.commitAction(req.body);
+
+    // AWS integrations — fire-and-forget, non-blocking
+    const entry = engine.getChangeLog().find(e => e.id === response.changeLogEntryId);
+    if (entry) {
+      persistActionToS3(entry).then(s3Key => {
+        if (s3Key) entry.s3Key = s3Key;
+      }).catch(() => {});
+      emitActionCommitMetric(entry).catch(() => {});
+    }
+
     res.json(response);
   });
 

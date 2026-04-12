@@ -1,6 +1,7 @@
 import type { SimulationState, Recommendation } from '@izakaya/shared';
 import { RECOMMENDATION_TEMPLATES, RECOMMENDATION_CONFIDENCE_NOTE } from '@izakaya/shared';
 import { v4 as uuid } from 'uuid';
+import { enrichRecommendationWithBedrock } from '../aws/bedrockNarrator';
 
 // Track consecutive ticks each condition has been true
 const conditionCounters: Record<string, number> = {};
@@ -262,6 +263,12 @@ export function evaluateRecommendations(
       state.activeRecommendations.push(rec);
       recHistory.push(rec);
       broadcast('recommendation:new', rec);
+
+      // Bedrock: enrich body text async (non-blocking)
+      enrichRecommendationWithBedrock(rec, state).then(enrichedBody => {
+        rec.body = enrichedBody;
+        broadcast('recommendation:updated', rec);
+      }).catch(() => {});
     } else if (!conditionMet && existing) {
       // Auto-resolve
       existing.status = 'resolved';

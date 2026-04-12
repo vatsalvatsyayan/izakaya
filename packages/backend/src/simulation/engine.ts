@@ -17,6 +17,8 @@ import {
 import { v4 as uuid } from 'uuid';
 
 import { createSeedState } from './seed';
+import { emitFacilityMetrics } from '../aws/cloudWatchEmitter';
+import { generatePostActionNarrative } from '../aws/bedrockNarrator';
 import { applyEnvironmentalDrift } from './drift';
 import { propagateLayerDependencies } from './dependencies';
 import { evaluateAlerts } from './alerts';
@@ -111,6 +113,9 @@ export class SimulationEngine {
 
     // 10. Broadcast state update
     broadcast('state:update', this.state);
+
+    // 11. AWS CloudWatch metrics (every 10 ticks, non-blocking)
+    emitFacilityMetrics(this.state).catch(() => {});
 
     // 11. Broadcast scenario progress if active
     if (this.state.activeScenario && this.scenarioStartTick !== null) {
@@ -358,6 +363,18 @@ export class SimulationEngine {
           metrics: currentMetrics,
           projectionAccuracy: accuracy,
         };
+
+        // Bedrock: generate post-action narrative (non-blocking)
+        const broadcastFn = this.broadcastFn;
+        const state = this.state;
+        generatePostActionNarrative(entry, state).then(narrative => {
+          if (narrative && entry) {
+            entry.bedrockNarrative = narrative;
+            if (broadcastFn) {
+              broadcastFn('action:narrative-ready', { id: entry.id, narrative });
+            }
+          }
+        }).catch(() => {});
       }
     }
     this.pendingOutcomeChecks = this.pendingOutcomeChecks.filter(

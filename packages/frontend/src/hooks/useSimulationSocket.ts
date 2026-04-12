@@ -52,6 +52,22 @@ export function useSimulationSocket() {
             case 'scenario:progress':
               setScenarioProgress(msg.data as ScenarioProgress);
               break;
+            case 'recommendation:updated':
+              // Bedrock-enriched body — state:update will carry it; toast to signal AI enrichment
+              addToast({
+                type: 'success',
+                title: 'AI Narrative Ready',
+                body: 'Bedrock has enriched a recommendation with live facility context.',
+              });
+              break;
+            case 'action:narrative-ready':
+              // Post-action narrative available — HistoryPanel will pick it up on next poll
+              addToast({
+                type: 'success',
+                title: 'Impact Narrative Available',
+                body: 'Bedrock generated a post-action sustainability summary. See History tab.',
+              });
+              break;
             case 'ping':
               ws.send(JSON.stringify({ event: 'pong', data: {} }));
               break;

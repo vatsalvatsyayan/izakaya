@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { SimulationEngine } from '../simulation/engine';
+import { emitRecommendationDismissedMetric } from '../aws/cloudWatchEmitter';
 
 export function createRecommendationsController(engine: SimulationEngine): Router {
   const router = Router();
@@ -31,6 +32,7 @@ export function createRecommendationsController(engine: SimulationEngine): Route
 
     const success = engine.dismissRecommendation(id);
     if (success) {
+      emitRecommendationDismissedMetric(rec.layerAffected, rec.severity).catch(() => {});
       res.json({ success: true, recommendationId: id });
     } else {
       res.status(400).json({ error: 'Failed to dismiss recommendation', code: 'VALIDATION_ERROR' });

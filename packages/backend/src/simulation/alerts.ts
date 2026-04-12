@@ -1,6 +1,9 @@
 import type { SimulationState, Alert } from '@izakaya/shared';
 import { LAYER_THRESHOLDS } from '@izakaya/shared';
 import { v4 as uuid } from 'uuid';
+import { publishCriticalAlertEvent } from '../aws/eventBridgePublisher';
+import { persistCriticalAlertToS3 } from '../aws/s3AuditLogger';
+import { emitCriticalAlertMetric } from '../aws/cloudWatchEmitter';
 
 interface MetricCheck {
   layerId: string;
@@ -113,6 +116,13 @@ export function evaluateAlerts(
     state.activeAlerts.push(alert);
     alertHistory.push(alert);
     broadcast('alert:new', alert);
+
+    // AWS: fire-and-forget for critical alerts
+    if (alert.severity === 'critical') {
+      publishCriticalAlertEvent(alert, state).catch(() => {});
+      persistCriticalAlertToS3(alert).catch(() => {});
+      emitCriticalAlertMetric(alert.layerId, alert.metricId).catch(() => {});
+    }
   }
 }
 

@@ -353,6 +353,10 @@ export interface ChangeLogEntry {
     projectionAccuracy: 'matched' | 'worse' | 'better';
   } | null;
   endUserImpactActual: EndUserImpact;
+  /** S3 key if this entry has been persisted to the audit ledger */
+  s3Key?: string;
+  /** AI-generated narrative from Bedrock, populated ~5 simulated minutes after commit */
+  bedrockNarrative?: string;
 }
 
 // --- End User Impact ---

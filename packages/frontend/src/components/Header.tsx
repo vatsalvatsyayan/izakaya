@@ -3,6 +3,7 @@ import { useDashboardStore } from '../store/useDashboardStore';
 import { useToastStore } from '../store/useToastStore';
 import { HealthGauge, computeOverallHealth } from './HealthGauge';
 import { SpeedControl } from './SpeedControl';
+import { AWSStatusBadge } from './AWSStatusBadge';
 import type { ScenarioDefinition } from '@izakaya/shared';
 
 export function Header() {
@@ -87,6 +88,11 @@ export function Header() {
           {Math.round(healthScore)}%
         </span>
       </div>
+
+      <div className="w-px h-6 bg-[#2d3148]" />
+
+      {/* AWS status badge */}
+      <AWSStatusBadge />
 
       <div className="w-px h-6 bg-[#2d3148]" />
 

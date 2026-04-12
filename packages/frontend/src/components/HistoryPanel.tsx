@@ -71,9 +71,22 @@ export function HistoryPanel() {
             <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>
               {entry.operatorAction}
             </span>
-            <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-              {new Date(entry.timestamp).toLocaleTimeString()}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {entry.s3Key && (
+                <span style={{
+                  fontSize: 10,
+                  color: '#F59E0B',
+                  padding: '2px 6px',
+                  border: '1px solid #F59E0B',
+                  borderRadius: 4,
+                }}>
+                  S3
+                </span>
+              )}
+              <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
+                {new Date(entry.timestamp).toLocaleTimeString()}
+              </span>
+            </div>
           </div>
           <AnimatePresence>
             {expandedId === entry.id && (
@@ -102,6 +115,22 @@ export function HistoryPanel() {
                     }}>
                       Outcome: {entry.outcomeAfterFiveMinutes.projectionAccuracy}
                     </p>
+                  )}
+                  {/* Bedrock AI Narrative */}
+                  {entry.bedrockNarrative && (
+                    <div style={{
+                      marginTop: 8,
+                      padding: '8px 12px',
+                      backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                      border: '1px solid rgba(99, 102, 241, 0.3)',
+                      borderRadius: 6,
+                      lineHeight: 1.5,
+                    }}>
+                      <span style={{ fontSize: 10, color: '#6366F1', fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                        ✦ AWS Bedrock · AI Impact Narrative
+                      </span>
+                      {entry.bedrockNarrative}
+                    </div>
                   )}
                 </div>
               </motion.div>

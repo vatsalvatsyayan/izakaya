@@ -5,6 +5,7 @@ import { createActionsController } from './actionsController';
 import { createScenariosController } from './scenariosController';
 import { createLogsController } from './logsController';
 import { createRecommendationsController } from './recommendationsController';
+import auditController from './auditController';
 
 export function createRouter(engine: SimulationEngine): Router {
   const router = Router();
@@ -14,6 +15,7 @@ export function createRouter(engine: SimulationEngine): Router {
   router.use(createScenariosController(engine));
   router.use(createLogsController(engine));
   router.use(createRecommendationsController(engine));
+  router.use(auditController);
 
   return router;
 }
