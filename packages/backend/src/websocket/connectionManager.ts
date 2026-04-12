@@ -1,13 +1,16 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import type { Server } from 'http';
-import { HEARTBEAT_INTERVAL_MS, HEARTBEAT_TIMEOUT_MS } from '@izakaya/shared';
+import { HEARTBEAT_INTERVAL_MS } from '@izakaya/shared';
+import type { SimulationEngine } from '../simulation/engine';
 
 interface ClientInfo {
   ws: WebSocket;
   isAlive: boolean;
 }
 
-export function createWebSocketServer(server: Server) {
+const VALID_SPEEDS = [1, 10, 30, 60, 100, 200];
+
+export function createWebSocketServer(server: Server, engine?: SimulationEngine) {
   const wss = new WebSocketServer({ server, path: '/ws' });
   const clients = new Set<ClientInfo>();
 
@@ -21,6 +24,11 @@ export function createWebSocketServer(server: Server) {
         const msg = JSON.parse(data.toString());
         if (msg.event === 'pong') {
           client.isAlive = true;
+        } else if (msg.event === 'speed:set' && engine) {
+          const speed = msg.data?.speed;
+          if (typeof speed === 'number' && VALID_SPEEDS.includes(speed)) {
+            engine.setTickInterval(Math.round(2000 / speed));
+          }
         }
       } catch {
         // Ignore malformed messages

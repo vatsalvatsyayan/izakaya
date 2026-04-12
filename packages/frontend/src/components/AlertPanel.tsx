@@ -1,173 +1,105 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useDashboardStore } from '../store/useDashboardStore';
 import type { Alert, Recommendation } from '@izakaya/shared';
 
 function AlertCard({ alert }: { alert: Alert }) {
   const [expanded, setExpanded] = useState(false);
+  const acknowledgeAlert = useDashboardStore((s) => s.acknowledgeAlert);
+  const setActiveTab = useDashboardStore((s) => s.setActiveTab);
   const selectLayer = useDashboardStore((s) => s.selectLayer);
-  const borderColor = alert.severity === 'critical' ? 'var(--critical)' : 'var(--warning)';
+
+  const isCritical = alert.severity === 'critical';
+  const severityBorder = isCritical ? 'border-red-500' : 'border-orange-500';
+  const severityDot = isCritical ? 'bg-red-500' : 'bg-orange-500';
+  const severityBadge = isCritical ? 'bg-red-500/20 text-red-300' : 'bg-orange-500/20 text-orange-300';
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        borderLeft: `3px solid ${borderColor}`,
-        borderRadius: 6,
-        padding: '12px 12px 12px 16px',
-        cursor: 'pointer',
-      }}
-      onClick={() => setExpanded(!expanded)}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 14 }}>{alert.severity === 'critical' ? '\u2716' : '\u26A0'}</span>
-        <span style={{
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--text-primary)',
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {alert.metricName}
-        </span>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-          {alert.severity}
-        </span>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-          {expanded ? '\u25B2' : '\u25BC'}
-        </span>
+    <div className={`border-l-2 ${severityBorder} bg-[#252840] rounded-r-md mb-1 hover:bg-[#2a2e48] transition-colors ${alert.acknowledged ? 'opacity-50' : ''}`}>
+      <div className="flex items-center justify-between px-3 py-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${severityDot}`} />
+          <span className="text-sm text-white truncate">{alert.metricName}</span>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+          <span className={`text-[10px] px-1.5 py-0.5 rounded ${severityBadge}`}>
+            {alert.severity.toUpperCase()}
+          </span>
+          <span className="text-[10px] text-slate-500">{new Date(alert.timestamp).toLocaleTimeString()}</span>
+        </div>
       </div>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ overflow: 'hidden' }}
-          >
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '8px 0' }}>
-              {alert.message}
-            </p>
+
+      {expanded && (
+        <div className="px-3 pb-3">
+          <p className="text-xs text-slate-400">{alert.message}</p>
+          <div className="mt-2">
+            <div className="text-[11px] text-slate-500 uppercase mb-1">Recommended Actions</div>
             <button
-              onClick={(e) => { e.stopPropagation(); selectLayer(alert.layerId); }}
-              style={{
-                background: 'none',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-secondary)',
-                fontSize: 12,
-                fontWeight: 600,
-                padding: '4px 12px',
-                borderRadius: 6,
-                cursor: 'pointer',
-                fontFamily: 'var(--font-sans)',
-              }}
+              className="text-xs text-blue-400 hover:text-blue-300"
+              onClick={(e) => { e.stopPropagation(); selectLayer(alert.layerId); setActiveTab('controls'); }}
             >
-              View Layer
+              → View {alert.layerId} layer controls
             </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+          {!alert.acknowledged && (
+            <button
+              onClick={(e) => { e.stopPropagation(); acknowledgeAlert(alert.id); }}
+              className="text-[10px] text-slate-500 hover:text-slate-300 border border-[#3d4168] rounded px-2 py-0.5 mt-2"
+            >
+              Acknowledge
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function RecommendationCard({ rec }: { rec: Recommendation }) {
+export function RecommendationCard({ rec }: { rec: Recommendation }) {
   const [expanded, setExpanded] = useState(false);
   const selectLayer = useDashboardStore((s) => s.selectLayer);
   const setPendingLeverChange = useDashboardStore((s) => s.setPendingLeverChange);
+  const setActiveTab = useDashboardStore((s) => s.setActiveTab);
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        borderLeft: '3px solid var(--action-primary)',
-        borderRadius: 6,
-        padding: '12px 12px 12px 16px',
-        cursor: 'pointer',
-      }}
-      onClick={() => setExpanded(!expanded)}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 14, color: 'var(--action-primary)' }}>{'\uD83D\uDCA1'}</span>
-        <span style={{
-          fontSize: 14,
-          fontWeight: 600,
-          color: 'var(--text-primary)',
-          flex: 1,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}>
-          {rec.title}
-        </span>
-        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-          {expanded ? '\u25B2' : '\u25BC'}
+    <div className="border-l-2 border-blue-500 bg-[#252840] rounded-r-md mb-1 hover:bg-[#2a2e48] transition-colors">
+      <div className="flex items-center justify-between px-3 py-2 cursor-pointer" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 bg-blue-500" />
+          <span className="text-sm text-white truncate">{rec.title}</span>
+        </div>
+        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 flex-shrink-0 ml-2">
+          REC
         </span>
       </div>
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ overflow: 'hidden' }}
-          >
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', margin: '8px 0' }}>
-              {rec.body}
-            </p>
-            <p style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-tertiary)', margin: '4px 0' }}>
-              {rec.confidenceNote}
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fetch(`/api/recommendations/${rec.id}/dismiss`, { method: 'POST' });
-                }}
-                style={{
-                  background: 'none',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-secondary)',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: '4px 16px',
-                  height: 28,
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)',
-                }}
-              >
-                Dismiss
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectLayer(rec.layerAffected);
-                  setPendingLeverChange(rec.suggestedAction.lever, rec.suggestedAction.suggestedValue);
-                }}
-                style={{
-                  background: 'var(--action-primary)',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  padding: '4px 16px',
-                  height: 28,
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)',
-                }}
-              >
-                Apply
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+      {expanded && (
+        <div className="px-3 pb-3">
+          <p className="text-xs text-slate-400 mb-2">{rec.body}</p>
+          <p className="text-[11px] italic text-slate-500 mb-3">{rec.confidenceNote}</p>
+          <div className="flex gap-2">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                fetch(`/api/recommendations/${rec.id}/dismiss`, { method: 'POST' });
+              }}
+              className="text-[11px] text-slate-400 border border-[#3d4168] rounded px-3 py-1 hover:text-slate-200"
+            >
+              Dismiss
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                selectLayer(rec.layerAffected);
+                setPendingLeverChange(rec.suggestedAction.lever, rec.suggestedAction.suggestedValue);
+                setActiveTab('controls');
+              }}
+              className="text-[11px] text-white bg-blue-600 hover:bg-blue-700 rounded px-3 py-1"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -175,19 +107,26 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
 export function AlertPanel() {
   const alerts = useDashboardStore((s) => s.simulationState.activeAlerts);
   const recs = useDashboardStore((s) => s.simulationState.activeRecommendations);
+  const activeRecs = recs.filter((r: Recommendation) => r.status === 'active');
+
+  const isEmpty = alerts.length === 0 && activeRecs.length === 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {recs.filter((r: Recommendation) => r.status === 'active').map((rec: Recommendation) => (
-        <RecommendationCard key={rec.id} rec={rec} />
-      ))}
-      {alerts.map((alert: Alert) => (
-        <AlertCard key={alert.id} alert={alert} />
-      ))}
-      {alerts.length === 0 && recs.filter((r: Recommendation) => r.status === 'active').length === 0 && (
-        <p style={{ color: 'var(--text-tertiary)', fontSize: 14, textAlign: 'center', padding: 20 }}>
-          No active alerts or recommendations
-        </p>
+    <div className="p-3">
+      {isEmpty ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="text-slate-700 text-4xl mb-3">🛡</div>
+          <span className="text-slate-500 text-sm">No active alerts</span>
+        </div>
+      ) : (
+        <>
+          {activeRecs.map((rec: Recommendation) => (
+            <RecommendationCard key={rec.id} rec={rec} />
+          ))}
+          {alerts.map((alert: Alert) => (
+            <AlertCard key={alert.id} alert={alert} />
+          ))}
+        </>
       )}
     </div>
   );

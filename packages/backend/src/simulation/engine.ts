@@ -61,6 +61,12 @@ export class SimulationEngine {
     }
   }
 
+  setTickInterval(ms: number): void {
+    if (this.intervalId) clearInterval(this.intervalId);
+    this.intervalId = setInterval(() => this.tick(), ms);
+    console.log(`Simulation tick interval changed to ${ms}ms`);
+  }
+
   tick(): void {
     // 1. Increment tick and advance time
     this.state.tick++;

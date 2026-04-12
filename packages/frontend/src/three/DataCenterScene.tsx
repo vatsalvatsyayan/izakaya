@@ -1,7 +1,5 @@
 import { Canvas } from '@react-three/fiber';
 import { CameraController } from './CameraController';
-import { GroundPlane } from './GroundPlane';
-import { SkyDome } from './SkyDome';
 import { ServerRacks } from './ServerRack';
 import { CoolingTowers } from './CoolingTower';
 import { PDUCabinets } from './PDUCabinet';
@@ -19,13 +17,20 @@ export function DataCenterScene() {
       style={{ width: '100%', height: '100%' }}
       gl={{ antialias: true }}
     >
-      <ambientLight intensity={0.4} color="#B8C4D0" />
-      <directionalLight intensity={0.8} position={[10, 20, 10]} />
-      <hemisphereLight intensity={0.3} color="#87CEEB" groundColor="#2D2D2D" />
+      <color attach="background" args={['#c4d4db']} />
+      <hemisphereLight args={['#dbeafe', '#a8a090', 1.2]} />
+      <directionalLight position={[6, 10, 6]} intensity={2.8} castShadow
+        shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <directionalLight position={[-4, 8, -3]} intensity={0.6} />
+      <directionalLight position={[3, 4, -6]} intensity={0.4} />
+
+      {/* Ground plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow position={[0, -0.01, 0]}>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial color="#8f8f87" roughness={0.95} />
+      </mesh>
 
       <CameraController />
-      <SkyDome />
-      <GroundPlane />
       <ServerRacks />
       <CoolingTowers />
       <PDUCabinets />

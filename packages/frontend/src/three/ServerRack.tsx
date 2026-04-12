@@ -1,5 +1,6 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useDashboardStore } from '../store/useDashboardStore';
 
@@ -16,18 +17,57 @@ const PULSE_SPEEDS: Record<string, number> = {
 };
 
 const RACK_COLOR = new THREE.Color('#2A3042');
+const CYAN_EMISSIVE = new THREE.Color('#06b6d4');
+
+// Returns thermal emissive color+intensity based on GPU temperature
+function getThermalEmissive(temp: number): { color: THREE.Color; intensity: number } {
+  if (temp >= 83) return { color: new THREE.Color('#dc2626'), intensity: 1.10 };
+  if (temp >= 78) return { color: new THREE.Color('#ea580c'), intensity: 0.75 };
+  if (temp >= 72) return { color: new THREE.Color('#f97316'), intensity: 0.40 };
+  if (temp >= 65) return { color: new THREE.Color('#f59e0b'), intensity: 0.12 };
+  return { color: new THREE.Color('#000000'), intensity: 0 };
+}
 
 function SingleRack({ position, index }: { position: [number, number, number]; index: number }) {
   const bodyRef = useRef<THREE.Mesh>(null);
   const ledRef = useRef<THREE.Mesh>(null);
   const currentColor = useRef(new THREE.Color('#22C55E'));
   const currentOpacity = useRef(1);
+  const [hovered, setHovered] = useState(false);
 
   useFrame(({ clock }) => {
-    if (!ledRef.current) return;
-    const state = useDashboardStore.getState().simulationState;
+    // Always use .getState() inside useFrame — never call hooks here
+    const store = useDashboardStore.getState();
+    const state = store.simulationState;
+    const selectedComponent = store.selectedHealthComponent;
     const isShutdown = state.layers.gpu.levers.gracefulRackShutdown[index];
     const health = state.layers.gpu.health;
+    const gpuTemp = state.layers.gpu.averageGpuTemperature;
+
+    if (bodyRef.current) {
+      const bodyMat = bodyRef.current.material as THREE.MeshStandardMaterial;
+
+      if (selectedComponent === 'gpu') {
+        // Priority 1: health component selection — cyan pulse glow
+        const pulse = (Math.sin(clock.getElapsedTime() * 2) + 1) / 2;
+        bodyMat.emissive.copy(CYAN_EMISSIVE);
+        bodyMat.emissiveIntensity = THREE.MathUtils.lerp(1.2, 1.8, pulse);
+        bodyMat.opacity = THREE.MathUtils.lerp(bodyMat.opacity, 1, 0.02);
+      } else if (isShutdown) {
+        // Priority 2: rack is shut down — fade to dark
+        bodyMat.emissive.set('#000000');
+        bodyMat.emissiveIntensity = 0;
+        bodyMat.opacity = THREE.MathUtils.lerp(bodyMat.opacity, 0.3, 0.02);
+      } else {
+        // Priority 3: thermal coloring
+        const thermal = getThermalEmissive(gpuTemp);
+        bodyMat.emissive.lerp(thermal.color, 0.05);
+        bodyMat.emissiveIntensity = THREE.MathUtils.lerp(bodyMat.emissiveIntensity, thermal.intensity, 0.05);
+        bodyMat.opacity = THREE.MathUtils.lerp(bodyMat.opacity, 1, 0.02);
+      }
+    }
+
+    if (!ledRef.current) return;
 
     if (isShutdown) {
       currentOpacity.current += (0.3 - currentOpacity.current) * 0.02;
@@ -44,14 +84,14 @@ function SingleRack({ position, index }: { position: [number, number, number]; i
       mat.emissive.copy(currentColor.current);
       mat.emissiveIntensity = pulse;
     }
-
-    if (bodyRef.current) {
-      (bodyRef.current.material as THREE.MeshStandardMaterial).opacity = currentOpacity.current;
-    }
   });
 
   return (
-    <group position={position}>
+    <group
+      position={position}
+      onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { setHovered(false); document.body.style.cursor = 'default'; }}
+    >
       {/* Rack body */}
       <mesh ref={bodyRef}>
         <boxGeometry args={[1.2, 3, 0.8]} />
@@ -62,6 +102,31 @@ function SingleRack({ position, index }: { position: [number, number, number]; i
         <boxGeometry args={[0.02, 2.5, 0.1]} />
         <meshStandardMaterial color="#111" emissive="#22C55E" emissiveIntensity={0.2} />
       </mesh>
+      {/* Hover tooltip — reads from store snapshot, not hooks */}
+      {hovered && (() => {
+        const s = useDashboardStore.getState().simulationState;
+        const isDown = s.layers.gpu.levers.gracefulRackShutdown[index];
+        const temp = s.layers.gpu.averageGpuTemperature;
+        const util = s.layers.gpu.gpuUtilizationRate;
+        return (
+          <Html center style={{ pointerEvents: 'none' }}>
+            <div style={{
+              background: 'rgba(26,29,39,0.95)',
+              border: '1px solid #3d4168',
+              borderRadius: 4,
+              padding: '4px 8px',
+              fontSize: 10,
+              whiteSpace: 'nowrap',
+              color: '#fff',
+            }}>
+              <div style={{ fontWeight: 'bold' }}>Rack {index}</div>
+              <div style={{ color: '#94a3b8' }}>
+                {isDown ? 'SHUTDOWN' : `${temp.toFixed(1)}°C | ${(util * 100).toFixed(0)}% util`}
+              </div>
+            </div>
+          </Html>
+        );
+      })()}
     </group>
   );
 }

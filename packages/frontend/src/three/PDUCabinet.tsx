@@ -13,14 +13,23 @@ function SinglePDU({ position }: { position: [number, number, number] }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const currentColor = useRef(new THREE.Color('#22C55E'));
 
-  useFrame(() => {
+  useFrame(({ clock }) => {
     if (!meshRef.current) return;
-    const health = useDashboardStore.getState().simulationState.layers.power.health;
-    const target = HEALTH_COLORS[health] || HEALTH_COLORS.healthy;
-    currentColor.current.lerp(target, 0.05);
+    const store = useDashboardStore.getState();
+    const selectedComponent = store.selectedHealthComponent;
+    const health = store.simulationState.layers.power.health;
     const mat = meshRef.current.material as THREE.MeshStandardMaterial;
-    mat.emissive.copy(currentColor.current);
-    mat.emissiveIntensity = 0.15;
+
+    if (selectedComponent === 'power') {
+      const pulse = (Math.sin(clock.getElapsedTime() * 2) + 1) / 2;
+      mat.emissive.set('#06b6d4');
+      mat.emissiveIntensity = THREE.MathUtils.lerp(1.0, 1.6, pulse);
+    } else {
+      const target = HEALTH_COLORS[health] || HEALTH_COLORS.healthy;
+      currentColor.current.lerp(target, 0.05);
+      mat.emissive.copy(currentColor.current);
+      mat.emissiveIntensity = 0.15;
+    }
   });
 
   return (

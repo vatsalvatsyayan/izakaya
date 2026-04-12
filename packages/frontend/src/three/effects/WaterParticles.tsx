@@ -29,7 +29,7 @@ export function WaterParticles() {
   useFrame(() => {
     if (!meshRef.current) return;
     const state = useDashboardStore.getState().simulationState;
-    const coolingPower = state.layers.cooling.coolingPower;
+    const coolingPower = state.layers.power.coolingPower;
     const isRecirc = state.layers.cooling.levers.waterRecirculationMode;
     const density = THREE.MathUtils.clamp(coolingPower / 200, 0.1, 1);
     const activeCount = Math.round(density * MAX_PARTICLES);

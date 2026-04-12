@@ -7,11 +7,26 @@ export default {
     extend: {
       colors: {
         bg: {
-          primary: '#0F172A',
-          secondary: '#1E293B',
-          tertiary: '#273548',
-          elevated: '#334155',
+          primary: '#0f1117',
+          secondary: '#1a1d27',
+          panel: '#1e2133',
+          card: '#252840',
         },
+        border: {
+          subtle: '#2d3148',
+          DEFAULT: '#3d4168',
+        },
+        status: {
+          normal: '#22c55e',
+          caution: '#eab308',
+          warning: '#f97316',
+          critical: '#ef4444',
+        },
+        accent: {
+          blue: '#3b82f6',
+          cyan: '#06b6d4',
+        },
+        // Legacy aliases for unmigrated components
         txt: {
           primary: '#F8FAFC',
           secondary: '#94A3B8',
@@ -25,10 +40,10 @@ export default {
           text: '#86EFAC',
         },
         warning: {
-          DEFAULT: '#F59E0B',
-          glow: '#FBBF24',
-          subtle: 'rgba(245, 158, 11, 0.1)',
-          text: '#FCD34D',
+          DEFAULT: '#f97316',
+          glow: '#fb923c',
+          subtle: 'rgba(249, 115, 22, 0.1)',
+          text: '#fdba74',
         },
         critical: {
           DEFAULT: '#EF4444',
@@ -44,10 +59,6 @@ export default {
         info: '#6366F1',
         success: '#22C55E',
         error: '#EF4444',
-        border: {
-          DEFAULT: '#334155',
-          subtle: '#1E293B',
-        },
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],

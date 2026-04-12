@@ -13,7 +13,7 @@ const engine = new SimulationEngine();
 app.use('/api', createRouter(engine));
 
 const server = http.createServer(app);
-const { broadcast } = createWebSocketServer(server);
+const { broadcast } = createWebSocketServer(server, engine);
 
 engine.start(broadcast);
 
