@@ -6,7 +6,10 @@ import { useDashboardStore } from '../store/useDashboardStore';
 const MAX_PARTICLES = 2000;
 const INGRESS_POS = new THREE.Vector3(10, 2, 0);
 const EGRESS_POS = new THREE.Vector3(-6, 2, 0);
-const BLUE = new THREE.Color('#60A5FA');
+
+// Spec §1.5: #38BDF8 sky blue, fading to #0EA5E9 at egress; dropped = red
+const BLUE_INGRESS = new THREE.Color('#38BDF8');
+const BLUE_EGRESS = new THREE.Color('#0EA5E9');
 const RED = new THREE.Color('#EF4444');
 
 const dummy = new THREE.Object3D();
@@ -33,6 +36,7 @@ export function DataFlow() {
     const state = useDashboardStore.getState().simulationState;
     const { requestVolume, averageInferenceLatency, requestDropRate } = state.layers.workload;
 
+    // Spec §1.5: density ~ request volume, speed ~ latency
     const activeCount = Math.min(MAX_PARTICLES, Math.round(requestVolume / 5));
     const speed = THREE.MathUtils.mapLinear(
       Math.min(averageInferenceLatency, 500), 45, 500, 0.02, 0.003
@@ -62,14 +66,19 @@ export function DataFlow() {
         dummy.position.add(p.offset);
 
         const fadeOut = p.dropped && p.t > 0.5 ? 1 - (p.t - 0.5) / 0.5 : 1;
-        const s = 0.08 * fadeOut;
+        const s = 0.05 * fadeOut; // spec §1.5: radius ~0.05 scene units
         dummy.scale.set(s, s, s);
       }
 
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
 
-      tempColor.copy(p.dropped ? RED : BLUE);
+      if (p.dropped) {
+        tempColor.copy(RED);
+      } else {
+        // Blend from sky blue (ingress) to deeper blue (egress) based on travel progress
+        tempColor.copy(BLUE_INGRESS).lerp(BLUE_EGRESS, p.t);
+      }
       meshRef.current.setColorAt(i, tempColor);
     }
 
@@ -77,7 +86,7 @@ export function DataFlow() {
     if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true;
   });
 
-  const handleClick = useCallback((e: THREE.Event) => {
+  const handleClick = useCallback((e: { stopPropagation: () => void }) => {
     e.stopPropagation();
     const s = useDashboardStore.getState();
     s.setSelectedHealthComponent('workload');
@@ -85,25 +94,18 @@ export function DataFlow() {
   }, []);
 
   return (
-    <group>
-      {/* Ingress sphere */}
-      <mesh position={INGRESS_POS.toArray()} onClick={handleClick}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { document.body.style.cursor = 'default'; }}>
-        <sphereGeometry args={[0.5, 16, 16]} />
-        <meshStandardMaterial color="#3B82F6" emissive="#3B82F6" emissiveIntensity={0.3} metalness={0.2} roughness={0.8} />
-      </mesh>
-      {/* Egress sphere */}
-      <mesh position={EGRESS_POS.toArray()} onClick={handleClick}
-        onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
-        onPointerOut={() => { document.body.style.cursor = 'default'; }}>
-        <sphereGeometry args={[0.5, 16, 16]} />
-        <meshStandardMaterial color="#8B5CF6" emissive="#8B5CF6" emissiveIntensity={0.3} metalness={0.2} roughness={0.8} />
-      </mesh>
-      {/* Particles */}
+    <group onClick={handleClick}
+      onPointerOver={() => { document.body.style.cursor = 'pointer'; }}
+      onPointerOut={() => { document.body.style.cursor = 'default'; }}>
+      {/* Particles — spec §1.5: small spheres radius ~0.05 */}
       <instancedMesh ref={meshRef} args={[undefined, undefined, MAX_PARTICLES]}>
-        <sphereGeometry args={[1, 8, 8]} />
-        <meshStandardMaterial transparent opacity={0.7} />
+        <sphereGeometry args={[1, 6, 6]} />
+        <meshStandardMaterial
+          transparent
+          opacity={0.85}
+          emissive={BLUE_INGRESS}
+          emissiveIntensity={0.5}
+        />
       </instancedMesh>
     </group>
   );

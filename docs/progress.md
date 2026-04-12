@@ -69,4 +69,10 @@
 - ✅ At least 3 scenarios fully playable
 - ✅ Load time under 3 seconds
 - ✅ WebSocket updates within 1 second
+- ✅ 3D scene dark aesthetic (ground grid, dark sky, dark racks, particle data flow)
+- ✅ TradeoffModal: full 4-section layout, key numbers emphasized, non-skippable, checkbox gating
+- ✅ Community Burden Indicator: always-visible, WSI badge color/pulse, water+carbon
+- ✅ Simulation mode banner + blue canvas tint
+- ✅ Reconnecting amber banner on WS disconnect
+- ✅ History panel: ISO timestamps, immutability label, timestamped JSON download
 - ⬜ Demo script rehearsed

@@ -6,16 +6,28 @@ import { SpeedControl } from './SpeedControl';
 import { AWSStatusBadge } from './AWSStatusBadge';
 import type { ScenarioDefinition } from '@izakaya/shared';
 
+const STATUS_CONFIG = {
+  connected:    { dot: '#22C55E', text: '#4ADE80', label: 'LIVE',          glow: true  },
+  reconnecting: { dot: '#FACC15', text: '#FDE68A', label: 'RECONNECTING',  glow: false },
+  disconnected: { dot: '#F87171', text: '#FCA5A5', label: 'OFFLINE',       glow: false },
+} as const;
+
 export function Header() {
-  const connectionStatus = useDashboardStore((s) => s.connectionStatus);
-  const simulationState = useDashboardStore((s) => s.simulationState);
-  const setMode = useDashboardStore((s) => s.setMode);
-  const addToast = useToastStore((s) => s.addToast);
+  const connectionStatus  = useDashboardStore((s) => s.connectionStatus);
+  const simulationState   = useDashboardStore((s) => s.simulationState);
+  const setMode           = useDashboardStore((s) => s.setMode);
+  const addToast          = useToastStore((s) => s.addToast);
   const [scenarios, setScenarios] = useState<ScenarioDefinition[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]     = useState(false);
 
   const activeScenario = simulationState.activeScenario;
-  const healthScore = computeOverallHealth(simulationState);
+  const healthScore    = computeOverallHealth(simulationState);
+  const statusCfg      = STATUS_CONFIG[connectionStatus];
+
+  const scoreColor = healthScore >= 80 ? '#4ADE80'
+                   : healthScore >= 60 ? '#FACC15'
+                   : healthScore >= 40 ? '#FB923C'
+                   : '#F87171';
 
   useEffect(() => {
     fetch('/api/scenarios')
@@ -45,24 +57,40 @@ export function Header() {
     setLoading(false);
   }
 
-  const scoreColor = healthScore >= 80 ? 'text-green-400' : healthScore >= 60 ? 'text-yellow-400' : healthScore >= 40 ? 'text-orange-400' : 'text-red-400';
-
   return (
-    <div className="h-14 flex-shrink-0 bg-[#1a1d27] border-b border-[#2d3148] flex items-center px-4 gap-4">
-      {/* Logo */}
-      <div className="flex items-center gap-1 flex-shrink-0">
-        <span className="text-white font-bold text-base tracking-tight">AI FACTORY</span>
-        <span className="text-slate-500 text-xs ml-1">DIGITAL TWIN</span>
+    <div
+      className="flex-shrink-0 flex items-center px-4 gap-4"
+      style={{
+        height: 48,
+        background: '#0B111E',
+        borderBottom: '1px solid #1E3A5F',
+      }}
+    >
+      {/* Logo / wordmark */}
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <div style={{
+          width: 22, height: 22, borderRadius: 4,
+          background: 'linear-gradient(135deg, #1D4ED8, #0EA5E9)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 10, fontWeight: 900, color: 'white',
+        }}>
+          AI
+        </div>
+        <div>
+          <span className="text-white font-bold text-[13px] tracking-tight">AI FACTORY</span>
+          <span className="text-slate-600 text-[10px] ml-1.5 font-medium tracking-widest">DIGITAL TWIN</span>
+        </div>
       </div>
 
-      <div className="w-px h-6 bg-[#2d3148]" />
+      <div className="w-px h-5 bg-[#1E3A5F] flex-shrink-0" />
 
       {/* Scenario selector */}
       <select
         value={activeScenario || ''}
         onChange={(e) => activateScenario(e.target.value)}
         disabled={!!activeScenario || loading}
-        className="bg-[#252840] border border-[#3d4168] text-slate-300 text-xs rounded px-2 py-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="text-[11px] rounded px-2 py-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed outline-none"
+        style={{ background: '#1E293B', border: '1px solid #334155', color: '#CBD5E1', maxWidth: 180 }}
       >
         <option value="">Normal Operations</option>
         {scenarios.map((s) => (
@@ -71,8 +99,15 @@ export function Header() {
       </select>
 
       {activeScenario && (
-        <span className="text-xs text-blue-400 bg-blue-900/30 px-2 py-0.5 rounded border border-blue-700/30">
-          ACTIVE: {activeScenario}
+        <span
+          className="text-[10px] font-bold px-2 py-0.5 rounded whitespace-nowrap"
+          style={{
+            background: 'rgba(59,130,246,0.15)',
+            color: '#7DD3FC',
+            border: '1px solid rgba(59,130,246,0.3)',
+          }}
+        >
+          ▶ {activeScenario}
         </span>
       )}
 
@@ -81,29 +116,38 @@ export function Header() {
 
       <div className="flex-1" />
 
-      {/* Health gauge */}
+      {/* Overall health gauge */}
       <div className="flex items-center gap-2">
-        <HealthGauge score={healthScore} size={36} />
-        <span className={`text-sm font-mono font-bold ${scoreColor}`}>
+        <HealthGauge score={healthScore} size={32} />
+        <span
+          className="text-[13px] font-mono font-bold"
+          style={{ color: scoreColor, textShadow: `0 0 8px ${scoreColor}55` }}
+        >
           {Math.round(healthScore)}%
         </span>
       </div>
 
-      <div className="w-px h-6 bg-[#2d3148]" />
+      <div className="w-px h-5 bg-[#1E3A5F] flex-shrink-0" />
 
-      {/* AWS status badge */}
+      {/* AWS badge */}
       <AWSStatusBadge />
 
-      <div className="w-px h-6 bg-[#2d3148]" />
+      <div className="w-px h-5 bg-[#1E3A5F] flex-shrink-0" />
 
-      {/* Connection indicator */}
-      <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#252840]">
-        <span className={`w-1.5 h-1.5 rounded-full ${
-          connectionStatus === 'connected' ? 'bg-green-500 animate-pulse' :
-          connectionStatus === 'reconnecting' ? 'bg-yellow-500' : 'bg-red-500'
-        }`} />
-        <span className="text-[11px] text-slate-400">
-          {connectionStatus === 'connected' ? 'LIVE' : connectionStatus === 'reconnecting' ? 'RECONNECTING' : 'OFFLINE'}
+      {/* Connection status */}
+      <div
+        className="flex items-center gap-1.5 px-2 py-1 rounded"
+        style={{ background: '#111827', border: '1px solid #1E3A5F' }}
+      >
+        <span
+          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+          style={{
+            background: statusCfg.dot,
+            boxShadow: statusCfg.glow ? `0 0 5px ${statusCfg.dot}` : 'none',
+          }}
+        />
+        <span className="text-[10px] font-bold tracking-wider" style={{ color: statusCfg.text }}>
+          {statusCfg.label}
         </span>
       </div>
     </div>

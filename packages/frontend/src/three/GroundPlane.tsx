@@ -1,27 +1,51 @@
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
-import { useDashboardStore } from '../store/useDashboardStore';
 
-const GREEN = new THREE.Color('#22C55E');
-const BROWN = new THREE.Color('#8B6914');
+// Ground is lighter than the racks (#1E293B) for contrast, darker than the sky.
+// The metallic surface catches point-light pools from each machine.
+const FLOOR_COLOR = new THREE.Color('#1E3348');
+const GRID_COLOR  = new THREE.Color('#4A7298');   // matches horizon sky colour
+
+function buildGridGeometry(size: number, divisions: number): THREE.BufferGeometry {
+  const step = size / divisions;
+  const half = size / 2;
+  const positions: number[] = [];
+
+  for (let i = 0; i <= divisions; i++) {
+    const x = -half + i * step;
+    positions.push(x, 0, -half, x, 0, half);
+  }
+  for (let i = 0; i <= divisions; i++) {
+    const z = -half + i * step;
+    positions.push(-half, 0, z, half, 0, z);
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  return geo;
+}
 
 export function GroundPlane() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const currentColor = useRef(new THREE.Color('#22C55E'));
-
-  useFrame(() => {
-    if (!meshRef.current) return;
-    const wsi = useDashboardStore.getState().simulationState.layers.location.waterStressIndex;
-    const target = new THREE.Color().copy(GREEN).lerp(BROWN, Math.min(1, wsi));
-    currentColor.current.lerp(target, 0.05);
-    (meshRef.current.material as THREE.MeshStandardMaterial).color.copy(currentColor.current);
-  });
+  const gridGeo = useMemo(() => buildGridGeometry(60, 40), []);
+  const gridRef = useRef<THREE.LineSegments>(null);
 
   return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-      <planeGeometry args={[60, 60]} />
-      <meshStandardMaterial color="#22C55E" metalness={0} roughness={1} />
-    </mesh>
+    <group>
+      {/* Floor base — slightly lighter, metallic sheen catches point lights */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
+        <planeGeometry args={[60, 60]} />
+        <meshStandardMaterial color={FLOOR_COLOR} metalness={0.25} roughness={0.75} />
+      </mesh>
+
+      {/* Raised-floor tile grid overlay */}
+      <lineSegments ref={gridRef} geometry={gridGeo} position={[0, 0.001, 0]}>
+        <lineBasicMaterial
+          color={GRID_COLOR}
+          transparent
+          opacity={0.45}
+          depthWrite={false}
+        />
+      </lineSegments>
+    </group>
   );
 }

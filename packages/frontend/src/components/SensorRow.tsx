@@ -10,21 +10,26 @@ interface SensorRowProps {
   criticalLimit?: number;
 }
 
+const STATUS_DOT: Record<string, string>    = { healthy: '#22C55E', warning: '#FACC15', critical: '#F87171' };
+const STATUS_STROKE: Record<string, string> = { healthy: '#22C55E', warning: '#EAB308', critical: '#EF4444' };
+const STATUS_VALUE: Record<string, string>  = { healthy: '#E2E8F0', warning: '#FDE68A', critical: '#FCA5A5' };
+
 export function SensorRow({ label, value, unit, status, history, isBoolean, criticalLimit }: SensorRowProps) {
-  const statusDot = status === 'healthy' ? 'bg-green-500'
-    : status === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
-  const statusStroke = status === 'healthy' ? '#22c55e'
-    : status === 'warning' ? '#eab308' : '#ef4444';
+  const dotColor    = STATUS_DOT[status]    ?? STATUS_DOT.healthy;
+  const strokeColor = STATUS_STROKE[status] ?? STATUS_STROKE.healthy;
+  const valueColor  = STATUS_VALUE[status]  ?? STATUS_VALUE.healthy;
 
-  const trend = history.length >= 4
-    ? history[history.length - 1] - history[history.length - 4]
-    : 0;
-  const trendIcon = trend > 0.5 ? '↑' : trend < -0.5 ? '↓' : '→';
-  const trendColor = (trend > 0.5 && status !== 'healthy') ? 'text-orange-400'
-    : trend < -0.5 ? 'text-slate-500' : 'text-slate-700';
+  // Trend arrow
+  const trend = history.length >= 4 ? history[history.length - 1] - history[history.length - 4] : 0;
+  const trendIcon  = trend > 0.5 ? '↑' : trend < -0.5 ? '↓' : '—';
+  const trendColor = trend > 0.5 && status !== 'healthy' ? '#FB923C'
+                   : trend < -0.5                         ? '#38BDF8'
+                   : '#334155';
 
+  // Mini bar fill
   const barPercent = criticalLimit ? Math.min(100, (value / criticalLimit) * 100) : 0;
 
+  // Formatted value
   const displayValue = isBoolean
     ? null
     : (typeof value === 'number' && value < 1 && value > 0)
@@ -34,34 +39,73 @@ export function SensorRow({ label, value, unit, status, history, isBoolean, crit
         : String(Math.round(value));
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1 hover:bg-[#252840] transition-colors cursor-default">
-      <span className={`w-1 h-1 rounded-full flex-shrink-0 ${statusDot}`} />
-      <span className="text-[11px] text-slate-300 flex-1 truncate">{label}</span>
-      <span className={`text-[11px] ${trendColor}`}>{trendIcon}</span>
+    <div
+      className="flex items-center gap-2 px-3 py-[5px] hover:bg-[#1a2235] transition-colors cursor-default group"
+      style={{ borderBottom: '1px solid #0F172A' }}
+    >
+      {/* Status dot */}
+      <span
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{ background: dotColor, boxShadow: status !== 'healthy' ? `0 0 4px ${dotColor}` : 'none' }}
+      />
+
+      {/* Metric label */}
+      <span className="text-[11px] text-slate-400 flex-1 truncate group-hover:text-slate-200 transition-colors">
+        {label}
+      </span>
+
+      {/* Trend */}
+      <span className="text-[10px] font-mono w-3 text-center flex-shrink-0" style={{ color: trendColor }}>
+        {trendIcon}
+      </span>
+
+      {/* Value */}
       {isBoolean ? (
-        <span className={`text-xs font-mono ${value ? 'text-green-400' : 'text-slate-500'}`}>
+        <span className="text-[11px] font-mono font-semibold w-14 text-right" style={{ color: value ? '#4ADE80' : '#475569' }}>
           {value ? 'ON' : 'OFF'}
         </span>
       ) : (
-        <span className="text-xs font-mono text-slate-200 text-right w-16 tabular-nums">
+        <span
+          className="text-[12px] font-mono font-semibold w-16 text-right tabular-nums transition-colors duration-200"
+          style={{ color: valueColor }}
+        >
           {displayValue}
         </span>
       )}
-      <span className="text-[10px] text-slate-500 w-10 text-right flex-shrink-0">{unit}</span>
-      {criticalLimit && (
-        <div className="w-10 h-[3px] bg-[#252840] rounded-full overflow-hidden flex-shrink-0">
-          <div className="h-full rounded-full" style={{ width: `${barPercent}%`, backgroundColor: statusStroke }} />
+
+      {/* Unit */}
+      <span className="text-[10px] text-slate-600 w-10 text-right flex-shrink-0 truncate">{unit}</span>
+
+      {/* Mini fill bar */}
+      {criticalLimit ? (
+        <div className="w-8 h-[3px] rounded-full overflow-hidden flex-shrink-0" style={{ background: '#1E3A5F' }}>
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${barPercent}%`, background: strokeColor, transition: 'width 0.4s ease-out' }}
+          />
         </div>
+      ) : (
+        <div className="w-8 flex-shrink-0" />
       )}
-      {history.length > 1 && (
-        <div className="w-12 h-6 flex-shrink-0">
+
+      {/* Sparkline */}
+      {history.length > 1 ? (
+        <div className="w-14 h-6 flex-shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={history.slice(-60).map((v) => ({ v }))}>
-              <Line type="monotone" dataKey="v" stroke={statusStroke}
-                dot={false} strokeWidth={1.5} isAnimationActive={false} />
+              <Line
+                type="monotone"
+                dataKey="v"
+                stroke={strokeColor}
+                dot={false}
+                strokeWidth={1.5}
+                isAnimationActive={false}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
+      ) : (
+        <div className="w-14 flex-shrink-0" />
       )}
     </div>
   );
