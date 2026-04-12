@@ -10,6 +10,19 @@ All notable changes to this project are documented here. Format:
 
 ---
 
+## 2026-04-12 — Fix KPI bar tiles being clipped/too narrow
+- **Fixed:** KPI tiles in `AssetKPIBar` were shrinking to near-zero width due to `min-w-0` with no floor
+- **Changed:** Added `min-w-[130px]` to each `KPITile` to prevent over-shrinking
+- **Changed:** Increased bar height from `h-16` (64px) to `h-20` (80px) for better vertical breathing room
+- **Changed:** Switched to `items-stretch` so tiles fill the full bar height consistently
+- **Changed:** Replaced `truncate` on label with `whitespace-nowrap` so labels are never clipped
+- **Changed:** Reduced nameplate `min-w` from 220px to 190px and added `flex-shrink-0` to prevent it from shrinking
+- **Changed:** Added `overflow-x-auto` to the bar as a graceful fallback at narrow viewports
+- **Removed:** Decorative ISO/ASHRAE badge (non-data-ink element wasting horizontal space)
+- **Files affected:** `packages/frontend/src/components/AssetKPIBar.tsx`
+
+---
+
 ## 2026-04-12 — Full Implementation (Parallel Build)
 
 ### Phase 1: Shared Package

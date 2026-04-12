@@ -36,16 +36,16 @@ function KPITile({
 }) {
   const barColor = colorClass.replace('text-', 'bg-');
   return (
-    <div className="flex-1 flex flex-col justify-center px-3 border-r border-[#2d3148] min-w-0">
-      <div className="text-[11px] text-slate-400 uppercase tracking-wider truncate">{label}</div>
-      <div className="flex items-baseline gap-1">
-        <span className={`text-[17px] font-mono font-bold ${colorClass}`}>{formattedValue}</span>
-        <span className="text-[11px] text-slate-500">{unit}</span>
+    <div className="flex-1 min-w-[130px] flex flex-col justify-center px-4 py-2 border-r border-[#2d3148]">
+      <div className="text-[11px] text-slate-400 uppercase tracking-wider whitespace-nowrap">{label}</div>
+      <div className="flex items-baseline gap-1 mt-0.5">
+        <span className={`text-[18px] font-mono font-bold leading-tight ${colorClass}`}>{formattedValue}</span>
+        <span className="text-[11px] text-slate-500 whitespace-nowrap">{unit}</span>
       </div>
-      <div className="h-[2px] bg-[#2d3148] rounded-full mt-1 w-full">
+      <div className="h-[2px] bg-[#2d3148] rounded-full mt-1.5 w-full">
         <div className={`h-full rounded-full ${barColor}`} style={{ width: `${Math.min(100, percent)}%`, transition: 'width 0.5s' }} />
       </div>
-      <div className="text-[11px] text-slate-400 mt-0.5">{statusLabel}</div>
+      <div className="text-[10px] text-slate-400 mt-1">{statusLabel}</div>
     </div>
   );
 }
@@ -59,9 +59,9 @@ export function AssetKPIBar() {
   const carbon = state.derivedMetrics.carbonOutputKgPerHr;
 
   return (
-    <div className="h-16 flex-shrink-0 bg-[#1a1d27] border-b border-[#2d3148] flex items-center">
+    <div className="h-20 flex-shrink-0 bg-[#1a1d27] border-b border-[#2d3148] flex items-stretch overflow-x-auto">
       {/* Asset Nameplate */}
-      <div className="flex items-center gap-3 px-4 min-w-[220px] border-r border-[#2d3148] h-full">
+      <div className="flex items-center gap-3 px-4 min-w-[190px] border-r border-[#2d3148] flex-shrink-0">
         <div>
           <div className="text-white font-mono font-bold text-base">DC-001</div>
           <div className="flex gap-1.5 mt-0.5">
@@ -119,13 +119,6 @@ export function AssetKPIBar() {
         statusLabel={getStatusLabel(carbon, { green: 150, yellow: 250, orange: 400 }, true)}
       />
 
-      {/* Standards badge */}
-      <div className="hidden xl:flex items-center px-3 h-full border-l border-[#2d3148]">
-        <div className="text-[9px] text-slate-700 text-center">
-          <div>ISO 50001</div>
-          <div>ASHRAE A1</div>
-        </div>
-      </div>
     </div>
   );
 }
