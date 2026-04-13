@@ -55,6 +55,10 @@ export default function App() {
           <div className="w-[55%] relative overflow-hidden">
             <DataCenterScene />
             <AlertToast />
+            {/* Community Burden — pinned bottom-left of the 3D viewer */}
+            <div className="absolute bottom-0 left-0 z-10">
+              <CommunityBurdenIndicator />
+            </div>
           </div>
 
           {/* Right: Panel system */}
@@ -63,8 +67,6 @@ export default function App() {
             <ComponentDetailPanel />
             <ScenarioProgressBar />
             <TabContainer />
-            {/* Spec §3: Community Burden Indicator — always visible, never collapsible */}
-            <CommunityBurdenIndicator />
           </div>
         </div>
 

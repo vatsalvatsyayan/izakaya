@@ -3,8 +3,8 @@ import * as THREE from 'three';
 
 // Ground is lighter than the racks (#1E293B) for contrast, darker than the sky.
 // The metallic surface catches point-light pools from each machine.
-const FLOOR_COLOR = new THREE.Color('#1E3348');
-const GRID_COLOR  = new THREE.Color('#4A7298');   // matches horizon sky colour
+const FLOOR_COLOR = new THREE.Color('#D5DAE0');
+const GRID_COLOR  = new THREE.Color('#B0B8C4');
 
 function buildGridGeometry(size: number, divisions: number): THREE.BufferGeometry {
   const step = size / divisions;
