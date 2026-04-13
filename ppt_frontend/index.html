@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Factory Digital Twin — Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0E17;--bg2:#0F1420;--bg3:#141B2D;
+  --green:#00E5A0;--green-dim:#00E5A040;--green-glow:#00E5A066;
+  --orange:#FF6B35;--orange-dim:#FF6B3540;
+  --blue:#3B82F6;--blue-dim:#3B82F640;
+  --white:#FFFFFF;--gray:#94A3B8;--dark-gray:#334155;
+  --font-display:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'Space Mono',monospace;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--white);font-family:var(--font-body)}
+body{position:relative}
+
+/* ── GRID BACKGROUND ── */
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(circle at 50% 50%, #0F1420 0%, transparent 70%),
+    linear-gradient(rgba(0,229,160,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,160,.03) 1px, transparent 1px);
+  background-size:100% 100%, 80px 80px, 80px 80px;
+}
+.grid-bg::after{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,229,160,.06) 0%, transparent 60%);
+}
+
+/* ── SLIDE DECK ── */
+.deck{position:relative;width:100%;height:100%;z-index:1}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:60px 80px;opacity:0;pointer-events:none;transition:opacity .6s ease,transform .6s ease;transform:translateY(30px);
+  will-change:opacity,transform}
+.slide.active{opacity:1;pointer-events:auto;transform:translateY(0)}
+.slide.prev{opacity:0;transform:translateY(-30px)}
+
+/* ── STAGGER ANIMATION ── */
+.slide.active .anim{animation:fadeUp .7s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.slide.active .anim:nth-child(1){animation-delay:.1s}
+.slide.active .anim:nth-child(2){animation-delay:.2s}
+.slide.active .anim:nth-child(3){animation-delay:.3s}
+.slide.active .anim:nth-child(4){animation-delay:.4s}
+.slide.active .anim:nth-child(5){animation-delay:.5s}
+.slide.active .anim:nth-child(6){animation-delay:.6s}
+.slide.active .anim:nth-child(7){animation-delay:.7s}
+.slide.active .anim:nth-child(8){animation-delay:.8s}
+.slide.active .anim:nth-child(9){animation-delay:.9s}
+.slide.active .anim:nth-child(10){animation-delay:1s}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--green),var(--blue));
+  z-index:100;transition:width .4s ease;box-shadow:0 0 12px var(--green-glow)}
+.slide-counter{position:fixed;bottom:16px;right:24px;z-index:100;font-family:var(--font-mono);font-size:13px;
+  color:var(--gray);letter-spacing:1px}
+.slide-counter .current{color:var(--green);font-weight:700}
+
+/* ── NAV HINT ── */
+.nav-hint{position:fixed;bottom:16px;left:24px;z-index:100;font-family:var(--font-mono);font-size:11px;
+  color:var(--dark-gray);letter-spacing:1px;opacity:.6}
+
+/* ── TYPOGRAPHY ── */
+.hero-stat{font-family:var(--font-display);font-size:clamp(48px,7vw,88px);font-weight:800;
+  line-height:1;letter-spacing:-2px;
+  background:linear-gradient(135deg,var(--white) 0%,var(--green) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px var(--green-glow))}
+.hero-stat.orange{background:linear-gradient(135deg,var(--white) 0%,var(--orange) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 0 40px var(--orange-dim))}
+.slide-title{font-family:var(--font-display);font-size:clamp(28px,4vw,44px);font-weight:700;
+  letter-spacing:-1px;line-height:1.15;margin-bottom:12px}
+.slide-sub{font-size:clamp(16px,1.8vw,22px);color:var(--gray);line-height:1.5;max-width:900px}
+.slide-tagline{font-size:clamp(16px,1.6vw,20px);color:var(--green);font-style:italic;margin-top:20px;
+  font-family:var(--font-body);line-height:1.5;max-width:800px}
+.section-label{font-family:var(--font-mono);font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--green);margin-bottom:16px;opacity:.7}
+.orange-text{color:var(--orange)}
+.green-text{color:var(--green)}
+.blue-text{color:var(--blue)}
+.gray-text{color:var(--gray)}
+
+/* ── QUOTE ── */
+.blockquote{font-family:var(--font-display);font-size:clamp(22px,3vw,36px);font-weight:600;
+  font-style:italic;line-height:1.4;max-width:850px;text-align:center;position:relative;padding:0 40px}
+.blockquote::before,.blockquote::after{font-size:60px;color:var(--green);opacity:.4;position:absolute;
+  font-family:Georgia,serif;line-height:1}
+.blockquote::before{content:'\201C';top:-10px;left:0}
+.blockquote::after{content:'\201D';bottom:-30px;right:0}
+.quote-attr{font-family:var(--font-mono);font-size:14px;color:var(--gray);margin-top:20px;letter-spacing:1px}
+
+/* ── CARDS ── */
+.card-grid{display:grid;gap:20px;width:100%;max-width:1000px}
+.card-grid.cols-2{grid-template-columns:1fr 1fr}
+.card-grid.cols-3{grid-template-columns:1fr 1fr 1fr}
+.card-grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.card{background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:28px;
+  position:relative;overflow:hidden;transition:border-color .3s}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:.5}
+.card.blue::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.card.orange::before{background:linear-gradient(90deg,transparent,var(--orange),transparent)}
+.card-stat{font-family:var(--font-display);font-size:clamp(28px,3.5vw,48px);font-weight:800;line-height:1;
+  margin-bottom:8px}
+.card-stat.green{color:var(--green)}
+.card-stat.blue{color:var(--blue)}
+.card-stat.orange{color:var(--orange)}
+.card-label{font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gray);margin-bottom:8px}
+.card-detail{font-size:15px;color:var(--gray);line-height:1.5}
+
+/* ── TABLES ── */
+.data-table{width:100%;max-width:1000px;border-collapse:collapse;font-size:15px}
+.data-table th{font-family:var(--font-mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);padding:12px 16px;text-align:left;border-bottom:1px solid rgba(0,229,160,.2)}
+.data-table td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--gray)}
+.data-table td:first-child{color:var(--white);font-weight:500}
+.data-table tr:last-child td{border-bottom:none}
+.data-table .highlight{color:var(--green);font-weight:700;font-family:var(--font-mono)}
+.data-table .warn{color:var(--orange);font-weight:700;font-family:var(--font-mono)}
+.data-table .total td{color:var(--white);font-weight:700;border-top:1px solid rgba(0,229,160,.3)}
+
+/* ── BULLETS ── */
+.bullet-list{list-style:none;max-width:800px;text-align:left}
+.bullet-list li{padding:8px 0 8px 24px;position:relative;font-size:clamp(15px,1.4vw,19px);color:var(--gray);line-height:1.5}
+.bullet-list li::before{content:'';position:absolute;left:0;top:16px;width:8px;height:8px;
+  background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green-glow)}
+.bullet-list li strong{color:var(--white)}
+.bullet-list li .stat{color:var(--green);font-family:var(--font-mono);font-weight:700}
+.bullet-list li .warn-stat{color:var(--orange);font-family:var(--font-mono);font-weight:700}
+
+/* ── CALLOUT ── */
+.callout{background:rgba(255,107,53,.08);border-left:3px solid var(--orange);padding:16px 20px;
+  border-radius:0 8px 8px 0;font-size:16px;color:var(--orange);max-width:800px;margin-top:16px}
+.callout.green{background:rgba(0,229,160,.06);border-left-color:var(--green);color:var(--green)}
+.footer-note{font-size:14px;color:var(--dark-gray);margin-top:24px;max-width:800px;font-style:italic}
+
+/* ── TWO COLUMNS ── */
+.two-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px;width:100%;max-width:1000px;text-align:left}
+.col-title{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:16px}
+
+/* ── TIMELINE ── */
+.timeline{display:flex;gap:0;width:100%;max-width:1100px;position:relative}
+.timeline::before{content:'';position:absolute;top:32px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--green),var(--blue),var(--green))}
+.timeline-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.timeline-dot{width:20px;height:20px;border-radius:50%;background:var(--bg);border:2px solid var(--green);
+  margin-bottom:12px;position:relative;z-index:2;box-shadow:0 0 12px var(--green-glow)}
+.timeline-num{font-family:var(--font-mono);font-size:11px;color:var(--green);margin-bottom:4px}
+.timeline-label{font-family:var(--font-display);font-size:14px;font-weight:600;margin-bottom:4px}
+.timeline-desc{font-size:12px;color:var(--gray);padding:0 4px}
+
+/* ── ARCH DIAGRAM ── */
+.arch-box{background:var(--bg2);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px;
+  font-family:var(--font-mono);font-size:13px;line-height:1.8;color:var(--gray);white-space:pre;
+  max-width:1000px;width:100%;overflow-x:auto}
+.arch-box .g{color:var(--green)}.arch-box .b{color:var(--blue)}.arch-box .o{color:var(--orange)}
+.arch-box .w{color:var(--white);font-weight:700}
+
+/* ── COMPARISON TABLE ── */
+.compare-table{width:100%;max-width:900px;border-collapse:collapse}
+.compare-table th{font-family:var(--font-display);font-size:16px;padding:14px 16px;text-align:left}
+.compare-table th:nth-child(2){color:var(--gray)}
+.compare-table th:nth-child(3){color:var(--green)}
+.compare-table td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:15px;color:var(--gray)}
+.compare-table .check{color:var(--green);font-size:18px}.compare-table .cross{color:var(--dark-gray);font-size:18px}
+.compare-table td:first-child{color:var(--white);font-weight:500;font-size:14px}
+
+/* ── STATUS LIST ── */
+.status-list{list-style:none;text-align:left}
+.status-list li{padding:6px 0 6px 28px;position:relative;font-size:15px;color:var(--gray)}
+.status-list li::before{position:absolute;left:0;top:8px;font-size:14px}
+.status-list.done li::before{content:'✓';color:var(--green);font-weight:700}
+.status-list.next li::before{content:'→';color:var(--dark-gray)}
+
+/* ── STACK DIAGRAM ── */
+.stack-layer{padding:14px 24px;text-align:center;font-family:var(--font-mono);font-size:14px;
+  border:1px solid rgba(255,255,255,.06);margin:2px 0;border-radius:6px;max-width:600px;width:100%}
+.stack-layer.active{background:rgba(0,229,160,.1);border-color:var(--green);color:var(--green);font-weight:700;
+  box-shadow:0 0 20px rgba(0,229,160,.1)}
+.stack-layer.inactive{background:var(--bg2);color:var(--dark-gray)}
+
+/* ── TRADEOFF CARDS ── */
+.tradeoff-card{border-radius:12px;padding:28px;max-width:800px;width:100%;text-align:left;
+  font-size:17px;line-height:1.6}
+.tradeoff-card.green-border{background:rgba(0,229,160,.05);border:1px solid rgba(0,229,160,.25)}
+.tradeoff-card.orange-border{background:rgba(255,107,53,.05);border:1px solid rgba(255,107,53,.25)}
+.tradeoff-card .arrow{font-size:20px;margin:0 8px}
+
+/* ── CYCLE DIAGRAM ── */
+.cycle-container{position:relative;width:380px;height:380px}
+.cycle-node{position:absolute;background:var(--bg2);border:1px solid rgba(0,229,160,.2);border-radius:8px;
+  padding:8px 12px;font-size:11px;font-family:var(--font-mono);color:var(--gray);white-space:nowrap;
+  text-align:center}
+.cycle-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--orange);text-align:center}
+
+/* ── SECTION DIVIDER ── */
+.section-divider{text-align:center}
+.section-divider .slide-title{font-size:clamp(36px,5vw,56px);margin-bottom:24px}
+.section-divider .slide-sub{font-size:clamp(16px,1.6vw,20px);margin-bottom:32px}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%;max-width:1000px;margin-top:24px}
+.stat-item{text-align:center;padding:16px}
+.stat-num{font-family:var(--font-display);font-size:clamp(24px,3vw,36px);font-weight:800;color:var(--green)}
+.stat-label{font-size:13px;color:var(--gray);margin-top:4px}
+
+/* ── ROADMAP ── */
+.roadmap{max-width:800px;width:100%;text-align:left}
+.roadmap-item{display:flex;align-items:flex-start;gap:16px;padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.roadmap-num{font-family:var(--font-mono);font-size:13px;color:var(--green);min-width:24px;
+  padding-top:2px;font-weight:700}
+.roadmap-title{font-family:var(--font-display);font-size:17px;font-weight:600;margin-bottom:2px}
+.roadmap-desc{font-size:14px;color:var(--gray)}
+
+/* ── SCREENSHOT PLACEHOLDER ── */
+.screenshot-placeholder{background:var(--bg2);border:1px dashed rgba(0,229,160,.2);border-radius:12px;
+  height:180px;display:flex;align-items:center;justify-content:center;color:var(--dark-gray);
+  font-family:var(--font-mono);font-size:13px;position:relative;overflow:hidden}
+.screenshot-placeholder::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(0,229,160,.03) 0%,transparent 50%,rgba(59,130,246,.03) 100%)}
+
+/* ── GLOW PULSE ── */
+@keyframes glowPulse{0%,100%{box-shadow:0 0 20px var(--green-glow)}50%{box-shadow:0 0 40px var(--green-glow),0 0 60px rgba(0,229,160,.15)}}
+.glow-pulse{animation:glowPulse 3s ease-in-out infinite}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .slide{padding:30px 24px}
+  .card-grid.cols-2,.card-grid.cols-3,.card-grid.cols-4{grid-template-columns:1fr}
+  .two-cols{grid-template-columns:1fr}
+  .timeline{flex-wrap:wrap;gap:8px}
+  .stats-bar{grid-template-columns:1fr 1fr}
+}
+
+/* ── SCROLL CONTAINER FOR TALL SLIDES ── */
+.slide-inner{width:100%;max-width:1100px;display:flex;flex-direction:column;align-items:center;
+  text-align:center;gap:16px;max-height:100%;overflow-y:auto;padding:10px 0;
+  scrollbar-width:thin;scrollbar-color:var(--dark-gray) transparent}
+.slide-inner::-webkit-scrollbar{width:4px}
+.slide-inner::-webkit-scrollbar-thumb{background:var(--dark-gray);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<div class="deck" id="deck">
+
+<!-- ═══════════════ SLIDE 1 — HOOK ═══════════════ -->
+<div class="slide active" data-slide="1">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="hero-stat anim">$1 Billion.<br>Every Single Day.</div>
+    <div class="slide-sub anim" style="margin-top:16px">Microsoft · Meta · Amazon · Google · Oracle<br>AI data center spend in 2025</div>
+    <div class="callout anim" style="text-align:center;margin-top:24px">In 2026: nearly <strong>$2 billion/day</strong></div>
+    <div class="slide-tagline anim">The largest infrastructure buildout since the electric grid.<br>No sustainable AI framework governs how it operates.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 2 — THE AI FACTORY ═══════════════ -->
+<div class="slide" data-slide="2">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">The AI Factory</div>
+    <div class="blockquote anim" style="margin:32px 0">Data centers are factories — AI factories that take in raw data and produce <span class="green-text">intelligence</span>.</div>
+    <div class="quote-attr anim">— Jensen Huang, CEO, NVIDIA</div>
+    <div class="slide-sub anim" style="margin-top:32px;font-family:var(--font-mono);font-size:16px;letter-spacing:1px">
+      Every token → a GPU → a rack → power from a grid → cooled by water → in someone's community.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 3 — THE SCALE ═══════════════ -->
+<div class="slide" data-slide="3">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">The Scale of the Buildout</div>
+    <table class="data-table anim">
+      <thead><tr><th>Company</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+      <tbody>
+        <tr><td>Amazon</td><td>$59B</td><td>$100B+</td><td class="highlight">$200B</td></tr>
+        <tr><td>Google</td><td>$52B</td><td>$75B</td><td class="highlight">$175-185B</td></tr>
+        <tr><td>Microsoft</td><td>$44B</td><td>$80B</td><td class="highlight">$120B+</td></tr>
+        <tr><td>Meta</td><td>$37B</td><td>$60-65B</td><td class="highlight">$115-135B</td></tr>
+        <tr><td>Oracle</td><td>$12-15B</td><td>$40B+</td><td class="highlight">$50B</td></tr>
+        <tr class="total"><td>Total</td><td>$200B</td><td>$355B+</td><td class="highlight">$690-750B</td></tr>
+      </tbody>
+    </table>
+    <div class="callout anim">Capex/sales 2026: Oracle <strong>86%</strong> · Meta <strong>54%</strong> · Microsoft <strong>47%</strong> · Google <strong>46%</strong></div>
+    <div class="footer-note anim">Quadrupled since GPT-4. Aggregate capex now exceeds free cash flow.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 4 — THE FOUR COSTS ═══════════════ -->
+<div class="slide" data-slide="4">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">The Environmental Footprint of Computation</div>
+    <div class="card-grid cols-2 anim" style="margin-top:12px">
+      <div class="card blue">
+        <div class="card-label">Energy</div>
+        <div class="card-stat blue">460 TWh/yr</div>
+        <div class="card-detail">→ <strong>1,000+ TWh by 2026</strong> (more than Japan)</div>
+      </div>
+      <div class="card blue">
+        <div class="card-label">Water</div>
+        <div class="card-stat blue">5.6B gallons</div>
+        <div class="card-detail">Google alone, 2023. <strong>+17% YoY</strong></div>
+      </div>
+      <div class="card orange">
+        <div class="card-label">Carbon</div>
+        <div class="card-stat orange">+48%</div>
+        <div class="card-detail">Google emissions 2019 → 2023</div>
+      </div>
+      <div class="card orange">
+        <div class="card-label">E-Waste</div>
+        <div class="card-stat orange">1.2–5M tons</div>
+        <div class="card-detail">AI e-waste by 2030. GPU life: <strong>18-24 months</strong></div>
+      </div>
+    </div>
+    <div class="footer-note anim">Every AI query has an energy, water, carbon, and hardware cost. Operators see none at decision time.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 5 — ENERGY ═══════════════ -->
+<div class="slide" data-slide="5">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem · Energy</div>
+    <div class="hero-stat anim" style="font-size:clamp(40px,6vw,72px)">460 TWh/year</div>
+    <div class="slide-sub anim">Global data center electricity consumption</div>
+    <ul class="bullet-list anim" style="margin-top:24px">
+      <li>Ireland: <span class="stat">21%</span> of national electricity = data centers</li>
+      <li>1 AI query = <span class="stat">5-10×</span> electricity of a Google search</li>
+      <li>Utilities <strong>delaying coal plant retirements</strong> for DC demand</li>
+      <li><span class="stat">1,000+ TWh by 2026</span> — more than Japan's entire consumption</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 6 — WATER ═══════════════ -->
+<div class="slide" data-slide="6">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem · Water</div>
+    <div class="hero-stat anim" style="font-size:clamp(36px,5vw,64px)">5.6 Billion Gallons</div>
+    <div class="slide-sub anim">Google, 2023</div>
+    <ul class="bullet-list anim" style="margin-top:24px">
+      <li>50 GPT-4 prompts = <span class="stat">500ml water</span> (one bottle)</li>
+      <li>The Dalles, OR (pop. 15K): Google uses <span class="stat">25-30%</span> of city water — residents faced restrictions during drought</li>
+      <li>Microsoft: <span class="warn-stat">+34%</span> water since 2021. Meta: <span class="warn-stat">+24%</span></li>
+    </ul>
+    <div class="callout anim">All 3 hyperscalers pledged water reduction. All 3 went the opposite direction.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 7 — CARBON & E-WASTE ═══════════════ -->
+<div class="slide" data-slide="7">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">Carbon Emissions & Hardware Waste</div>
+    <div class="two-cols anim">
+      <div>
+        <div class="col-title orange-text">Carbon</div>
+        <ul class="bullet-list">
+          <li>GPT-4 training: <span class="warn-stat">5,000-10,000t CO₂</span></li>
+          <li>= <strong>500 transatlantic flights</strong></li>
+          <li>Google: <span class="warn-stat">+48%</span> emissions (2019-23)</li>
+          <li><span class="warn-stat">60-70%</span> of ML energy = inference</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title orange-text">E-Waste</div>
+        <ul class="bullet-list">
+          <li>AI e-waste: <span class="warn-stat">1.2-5M tons</span> by 2030</li>
+          <li>GPU obsolescence: <span class="warn-stat">18-24 months</span> (was 5yr)</li>
+          <li>Contains rare earths, gold, lead, mercury</li>
+          <li>Cobalt/lithium mining: <strong>child labor, toxic runoff, aquifer depletion</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 8 — WHO PAYS THE PRICE ═══════════════ -->
+<div class="slide" data-slide="8">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">Who Pays the Price</div>
+    <div class="two-cols anim">
+      <div>
+        <div class="col-title orange-text">Communities</div>
+        <ul class="bullet-list">
+          <li>Prince William County, VA: displaced majority-Black/Latino neighborhoods</li>
+          <li>Chicago: DC-adjacent communities = <span class="warn-stat">23% lower income</span></li>
+          <li><span class="warn-stat">$500M+</span> facility → <strong>30-50 permanent jobs</strong></li>
+          <li>Virginia: <span class="warn-stat">$750M tax breaks</span> (2016-23) — lowest job-to-subsidy ratio in any industry</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title orange-text">Supply Chain</div>
+        <ul class="bullet-list">
+          <li><strong>Cobalt</strong> (DRC): child labor, deforestation</li>
+          <li><strong>Lithium</strong> (Chile): depleting aquifers in driest regions</li>
+          <li><strong>E-waste disposal</strong>: exported to Ghana, Nigeria, India — informal recycling → lead/mercury exposure</li>
+          <li>DCs compete with agriculture/residential in drought-stressed regions</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-note anim">Cost borne at every stage: extraction → operation → disposal. Upside rarely shared.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 9 — THE FEEDBACK LOOP ═══════════════ -->
+<div class="slide" data-slide="9">
+  <div class="slide-inner">
+    <div class="section-label anim">The Problem</div>
+    <div class="slide-title anim">Why It Gets Worse</div>
+    <div class="anim" style="margin:20px 0">
+      <div class="cycle-container" style="width:100%;max-width:700px;height:auto;position:relative">
+        <svg viewBox="0 0 700 320" style="width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">
+          <!-- Circular arrow path -->
+          <ellipse cx="350" cy="160" rx="280" ry="120" fill="none" stroke="rgba(0,229,160,.15)" stroke-width="2"/>
+          <!-- Nodes around the ellipse -->
+          <g font-family="'Space Mono',monospace" font-size="11" fill="#94A3B8">
+            <text x="350" y="28" text-anchor="middle" fill="#00E5A0" font-weight="700">More capable models</text>
+            <text x="590" y="80" text-anchor="middle">More users</text>
+            <text x="650" y="165" text-anchor="middle">More inference</text>
+            <text x="590" y="245" text-anchor="middle">More data centers</text>
+            <text x="350" y="300" text-anchor="middle" fill="#FF6B35" font-weight="700">More carbon · More water</text>
+            <text x="110" y="245" text-anchor="middle">More electricity</text>
+            <text x="50" y="165" text-anchor="middle">More power plants</text>
+            <text x="110" y="80" text-anchor="middle">Climate worsens</text>
+          </g>
+          <!-- Arrows -->
+          <g fill="none" stroke="rgba(0,229,160,.3)" stroke-width="1.5">
+            <path d="M420,32 Q530,30 570,65" marker-end="url(#arrow)"/>
+            <path d="M620,95 Q660,120 645,150" marker-end="url(#arrow)"/>
+            <path d="M640,180 Q650,220 600,240" marker-end="url(#arrow)"/>
+            <path d="M540,255 Q450,290 380,290" marker-end="url(#arrow)"/>
+            <path d="M310,290 Q200,270 140,250" marker-end="url(#arrow)"/>
+            <path d="M90,230 Q40,200 45,170" marker-end="url(#arrow)"/>
+            <path d="M50,145 Q40,110 85,80" marker-end="url(#arrow)"/>
+            <path d="M155,68 Q250,30 310,28" marker-end="url(#arrow)"/>
+          </g>
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(0,229,160,.5)"/>
+            </marker>
+          </defs>
+          <!-- Center label -->
+          <text x="350" y="155" text-anchor="middle" font-family="'Syne',sans-serif" font-size="16" font-weight="800" fill="#FF6B35">REPEAT</text>
+          <text x="350" y="175" text-anchor="middle" font-family="'Space Mono',monospace" font-size="10" fill="#94A3B8">∞</text>
+        </svg>
+      </div>
+    </div>
+    <div class="callout anim" style="text-align:center">20-30 year facility lifetimes. Decisions made <strong>now</strong> = emissions through <strong>2050</strong>.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 10 — PROBLEM STATEMENT ═══════════════ -->
+<div class="slide" data-slide="10">
+  <div class="slide-inner section-divider">
+    <div class="anim" style="width:80px;height:2px;background:var(--green);margin-bottom:32px;box-shadow:0 0 12px var(--green-glow)"></div>
+    <div class="slide-title anim" style="font-size:clamp(36px,5.5vw,60px)">Operators Are Flying Blind</div>
+    <div class="slide-sub anim" style="margin-top:16px">Sustainability data lives in annual reports and disconnected dashboards.<br>Never in the operational loop. Never at the moment of decision.</div>
+    <div class="anim" style="margin-top:40px;padding:0 40px">
+      <div class="slide-tagline" style="font-size:clamp(18px,2vw,24px);font-style:italic">
+        "You can't optimize what you can't see.<br>You can't be accountable for what you don't acknowledge."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 11 — OUR SOLUTION ═══════════════ -->
+<div class="slide" data-slide="11">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">A Sustainable AI Framework<br>for the AI Factory</div>
+    <div class="slide-sub anim">Real-time 3D digital twin. Makes the environmental footprint of computation<br><strong style="color:var(--green)">visible, quantifiable, and non-dismissable</strong>.</div>
+    <div class="card-grid cols-2 anim" style="margin-top:20px">
+      <div class="card">
+        <div class="card-label">5 Infrastructure Layers</div>
+        <div class="card-detail" style="color:var(--white)">Power · Cooling · GPU · Workload · Location</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Live Simulation</div>
+        <div class="card-detail" style="color:var(--white)">WebSocket-driven, <span class="green-text">2-second</span> updates</div>
+      </div>
+      <div class="card">
+        <div class="card-label">What-If Scenarios</div>
+        <div class="card-detail" style="color:var(--white)">Test decisions before committing</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Ethical Tradeoff Gate</div>
+        <div class="card-detail" style="color:var(--white)">Every action requires sustainability acknowledgment</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 12 — DEMO FLOW ═══════════════ -->
+<div class="slide" data-slide="12">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">The Operator Journey</div>
+    <div class="timeline anim" style="margin-top:24px">
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">01</div><div class="timeline-label">Monitor</div><div class="timeline-desc">3D twin + live metrics across 5 layers</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">02</div><div class="timeline-label">Alert</div><div class="timeline-desc">Cooling drops, water spikes</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">03</div><div class="timeline-label">Investigate</div><div class="timeline-desc">Cross-layer cascading effects</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">04</div><div class="timeline-label">Simulate</div><div class="timeline-desc">What-if scenarios</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">05</div><div class="timeline-label">Decide</div><div class="timeline-desc">Choose an action</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">06</div><div class="timeline-label">Acknowledge</div><div class="timeline-desc">Forced sustainability modal</div></div>
+      <div class="timeline-step"><div class="timeline-dot"></div><div class="timeline-num">07</div><div class="timeline-label">Log</div><div class="timeline-desc">Decision stored permanently</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 13 — TECHNICAL ARCHITECTURE ═══════════════ -->
+<div class="slide" data-slide="13">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">Under the Hood</div>
+    <div class="two-cols anim" style="gap:24px;max-width:1000px">
+      <div class="card" style="text-align:left">
+        <div class="card-label">Backend</div>
+        <div style="font-family:var(--font-mono);font-size:13px;line-height:2;color:var(--gray)">
+          <span style="color:var(--white);font-weight:700">Simulation Engine</span><br>
+          ├─ Tick loop (2s)<br>
+          ├─ Drift model<br>
+          ├─ Dependencies<br>
+          ├─ Alerts<br>
+          └─ Recommendations<br>
+          <span style="color:var(--green)">5 Layers: Power · Cool · GPU · Workload · Location</span>
+        </div>
+      </div>
+      <div class="card" style="text-align:left">
+        <div class="card-label">Frontend</div>
+        <div style="font-family:var(--font-mono);font-size:13px;line-height:2;color:var(--gray)">
+          <span style="color:var(--white);font-weight:700">Zustand Store</span><br>
+          ├─ React Three Fiber<br>
+          ├─ 3D Scene<br>
+          ├─ Health colors<br>
+          ├─ 60fps interpolation<br>
+          └─ <span style="color:var(--orange)">Ethical Gate</span><br>
+          <span style="color:var(--blue)">WebSocket (2s) + REST API</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-grid cols-3 anim" style="margin-top:12px">
+      <div class="card"><div class="card-label">Dependency Graph</div><div class="card-detail">GPU → power → cooling → water → community. Not independent metrics.</div></div>
+      <div class="card"><div class="card-label">Shared Types</div><div class="card-detail">Single TypeScript package. Zero runtime mismatches.</div></div>
+      <div class="card"><div class="card-label">3D Performance</div><div class="card-detail">60fps interpolation from 2-second state ticks.</div></div>
+    </div>
+    <div class="footer-note anim" style="font-family:var(--font-mono);font-size:12px;letter-spacing:1px;color:var(--dark-gray)">TypeScript monorepo · Node/Express · React/Three.js · Zustand · WebSocket</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 14 — PRODUCT SCREENSHOTS ═══════════════ -->
+<div class="slide" data-slide="14">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">The Product</div>
+    <div class="card-grid cols-3 anim" style="margin-top:12px">
+      <div>
+        <div class="screenshot-placeholder" style="height:200px">[Screenshot: 3D Twin + Dashboard]</div>
+        <div style="font-size:13px;color:var(--gray);margin-top:8px">Real-time 3D twin with live metrics across 5 layers</div>
+      </div>
+      <div>
+        <div class="screenshot-placeholder" style="height:200px">[Screenshot: Tradeoff Modal]</div>
+        <div style="font-size:13px;color:var(--gray);margin-top:8px">Forced sustainability acknowledgment before any action</div>
+      </div>
+      <div>
+        <div class="screenshot-placeholder" style="height:200px">[Screenshot: Layer Detail]</div>
+        <div style="font-size:13px;color:var(--gray);margin-top:8px">Cross-layer dependencies + scenario simulation</div>
+      </div>
+    </div>
+    <div class="footer-note anim">Replace with actual screenshots before presenting. Judges score Design (15%) on visual evidence.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 15 — SUSTAINABILITY BUILT IN ═══════════════ -->
+<div class="slide" data-slide="15">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">Sustainability — Built In, Not Bolted On</div>
+    <div class="tradeoff-card green-border anim" style="margin-top:16px">
+      <div style="font-size:14px;color:var(--gray);margin-bottom:8px">Raise cooling setpoints →</div>
+      <div>Saves <span class="green-text" style="font-weight:700;font-family:var(--font-mono)">12% energy</span> ($340K/yr), but increases <span class="orange-text" style="font-weight:700;font-family:var(--font-mono)">water consumption 8%</span> in drought-stressed region</div>
+    </div>
+    <div class="tradeoff-card orange-border anim" style="margin-top:12px">
+      <div style="font-size:14px;color:var(--gray);margin-bottom:8px">Shift workload to cheaper grid →</div>
+      <div>Saves <span class="green-text" style="font-weight:700;font-family:var(--font-mono)">$18K/month</span>, but increases <span class="orange-text" style="font-weight:700;font-family:var(--font-mono)">carbon intensity 34%</span> = 200 additional cars/year</div>
+    </div>
+    <ul class="bullet-list anim" style="margin-top:16px">
+      <li>Operator <strong>must acknowledge</strong> before commit</li>
+      <li>Every decision + acknowledgment <strong>permanently logged</strong></li>
+      <li>A sustainability framework <strong>inside</strong> the operational loop — not a quarterly CSR report</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 16 — WHAT'S LIVE TODAY ═══════════════ -->
+<div class="slide" data-slide="16">
+  <div class="slide-inner">
+    <div class="section-label anim">The Solution</div>
+    <div class="slide-title anim">Prototype Status</div>
+    <div class="two-cols anim" style="margin-top:12px">
+      <div>
+        <div class="col-title green-text">Working Now ✓</div>
+        <ul class="status-list done">
+          <li>3D data center rendering (React Three Fiber)</li>
+          <li>Simulation engine — 2s tick, 5 layers</li>
+          <li>Cross-layer dependency propagation</li>
+          <li>WebSocket live broadcast</li>
+          <li>Drift model + realistic fluctuation</li>
+          <li>Alert evaluation + threshold triggers</li>
+          <li>Recommendation engine</li>
+          <li>Tradeoff modal (enforced, non-bypassable)</li>
+          <li>Decision + acknowledgment logging</li>
+          <li>Layer sidebar + metrics top bar</li>
+          <li>Scenario system</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title gray-text">Next Phase →</div>
+        <ul class="status-list next">
+          <li>Real DCIM/BMS telemetry integration</li>
+          <li>Physics-based CFD thermal simulation</li>
+          <li>Per-GPU predictive degradation curves</li>
+          <li>Multi-site portfolio optimization</li>
+          <li>Community-facing public dashboards</li>
+          <li>AI nutrition labels per query</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-note anim">Left column = functional, demoed live. Right column = roadmap, architecturally prepared.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 17 — E-WASTE & DIGITAL TWINS ═══════════════ -->
+<div class="slide" data-slide="17">
+  <div class="slide-inner">
+    <div class="section-label anim">Why Digital Twins</div>
+    <div class="hero-stat orange anim" style="font-size:clamp(36px,5vw,60px)">1.2–5.0 Million Tons</div>
+    <div class="slide-sub anim">AI e-waste by 2030 <span style="color:var(--dark-gray)">(Nature Computational Science, 2024)</span></div>
+    <div class="two-cols anim" style="margin-top:20px">
+      <div>
+        <div class="col-title orange-text">The Problem</div>
+        <ul class="bullet-list">
+          <li>GPU obsolescence: <span class="warn-stat">18-24 months</span> (was 5 years)</li>
+          <li>Contains gold, copper, rare earths + lead, mercury, chromium</li>
+          <li>Reuse could cut waste by <span class="stat">42%</span> — if you know <em>when</em> and <em>what</em> to replace</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title green-text">What the Digital Twin Enables</div>
+        <ul class="bullet-list">
+          <li><strong>Per-GPU tracking</strong>: thermal degradation → know when each unit drops below efficiency</li>
+          <li><strong>Replace smart, not fast</strong>: prioritize least efficient units</li>
+          <li><strong>Circular economy</strong>: redeploy degraded GPUs to lighter workloads</li>
+          <li><strong>Fleet what-if</strong>: "Replace 500 H100s with 200 B200s" → instant impact analysis</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 18 — TWIN VS DASHBOARD ═══════════════ -->
+<div class="slide" data-slide="18">
+  <div class="slide-inner">
+    <div class="section-label anim">Why Digital Twins</div>
+    <div class="slide-title anim">Why Digital Twins, Not Dashboards</div>
+    <table class="compare-table anim" style="margin-top:16px">
+      <thead><tr><th></th><th>Dashboard</th><th>Digital Twin</th></tr></thead>
+      <tbody>
+        <tr><td>Current state</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+        <tr><td>"What if CRAH-3 fails at 2 AM?"</td><td><span class="cross">✗</span></td><td style="color:var(--green)">Physics simulation</td></tr>
+        <tr><td>Cross-layer dependencies</td><td style="color:var(--gray)">Siloed</td><td style="color:var(--green)">GPU → power → cooling → water → community</td></tr>
+        <tr><td>Maintenance</td><td style="color:var(--gray)">Threshold alerts</td><td style="color:var(--green)">Predict <em>when</em> GPU falls below efficiency</td></tr>
+        <tr><td>Sustainability</td><td style="color:var(--gray)">Historical reports</td><td style="color:var(--green)">Simulate impact <em>before</em> committing</td></tr>
+      </tbody>
+    </table>
+    <div class="anim" style="margin-top:32px">
+      <div class="slide-tagline" style="font-size:clamp(20px,2.5vw,30px);font-style:normal;font-family:var(--font-display);font-weight:700">
+        A dashboard shows what <span style="color:var(--gray)">IS</span>.<br>A digital twin shows what <span class="green-text">WILL BE</span>.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 19 — PREDICTIVE SUSTAINABILITY ═══════════════ -->
+<div class="slide" data-slide="19">
+  <div class="slide-inner">
+    <div class="section-label anim">Why Digital Twins</div>
+    <div class="slide-title anim">Predictive Maintenance → Predictive Sustainability</div>
+    <div class="slide-sub anim">"When will it fail?" → <strong class="green-text">"When does it become unsustainable?"</strong></div>
+    <table class="data-table anim" style="margin-top:16px">
+      <thead><tr><th>Capability</th><th>Enables</th></tr></thead>
+      <tbody>
+        <tr><td>GPU thermal degradation</td><td>Replace before efficiency drops → energy-efficient next-gen</td></tr>
+        <tr><td>Cooling system wear</td><td>Maintain before water/energy spikes</td></tr>
+        <tr><td>PSU aging curves</td><td>Swap when efficiency &lt; 90% → reduce waste heat</td></tr>
+        <tr><td>Fleet lifecycle</td><td>Replace <em>least efficient first</em> → max sustainability ROI</td></tr>
+      </tbody>
+    </table>
+    <div class="stats-bar anim">
+      <div class="stat-item"><div class="stat-num">30-45%</div><div class="stat-label">↓ Downtime</div></div>
+      <div class="stat-item"><div class="stat-num">20-25%</div><div class="stat-label">↑ Asset Life</div></div>
+      <div class="stat-item"><div class="stat-num">25-30%</div><div class="stat-label">↓ Maintenance Cost</div></div>
+      <div class="stat-item"><div class="stat-num">98%</div><div class="stat-label">Prediction Accuracy</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 20 — NVIDIA STACK ═══════════════ -->
+<div class="slide" data-slide="20">
+  <div class="slide-inner">
+    <div class="section-label anim">Why Digital Twins</div>
+    <div class="slide-title anim">The NVIDIA Stack Powering This</div>
+    <table class="data-table anim" style="font-size:13px">
+      <thead><tr><th>Tech</th><th>Purpose</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr><td>Omniverse DSX</td><td>GW-scale AI factory digital twin</td><td class="highlight">Unified facility simulation</td></tr>
+        <tr><td>DSX Boost</td><td>Max-Q efficiency</td><td class="highlight">+30% throughput, same power</td></tr>
+        <tr><td>DSX Flex</td><td>Grid demand balancing</td><td class="highlight">100 GW underutilized capacity</td></tr>
+        <tr><td>DSX Exchange</td><td>IT/OT integration</td><td>Real-time APIs</td></tr>
+        <tr><td>Modulus</td><td>Physics-informed NNs (PINNs)</td><td class="highlight">10-100× faster than CFD</td></tr>
+        <tr><td>cuOpt</td><td>Workload placement</td><td>Carbon-aware scheduling</td></tr>
+        <tr><td>Earth-2</td><td>Climate simulation</td><td class="highlight">1000× faster site planning</td></tr>
+      </tbody>
+    </table>
+    <div class="card-grid cols-2 anim" style="margin-top:12px;font-size:13px">
+      <div class="card" style="padding:16px"><div class="card-detail"><strong style="color:var(--white)">Equinix</strong>: 5kW air-cooled → Blackwell GPU racks — planned in Omniverse first</div></div>
+      <div class="card" style="padding:16px"><div class="card-detail"><strong style="color:var(--white)">Schneider</strong>: Power/cooling designs for GB300 NVL72</div></div>
+      <div class="card" style="padding:16px"><div class="card-detail"><strong style="color:var(--white)">Nscale + Caterpillar</strong>: Multi-GW AI factory, West Virginia</div></div>
+      <div class="card" style="padding:16px"><div class="card-detail"><strong style="color:var(--white)">ETAP</strong> (Mar 2025): First electrical digital twin, grid-to-chip</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 21 — AI STACK POSITION ═══════════════ -->
+<div class="slide" data-slide="21">
+  <div class="slide-inner">
+    <div class="section-label anim">Why Digital Twins</div>
+    <div class="slide-title anim">Where We Operate</div>
+    <div class="anim" style="display:flex;flex-direction:column;align-items:center;gap:4px;margin:16px 0">
+      <div class="stack-layer inactive">Application · Inference · Training</div>
+      <div class="stack-layer active">★ GPU / Compute — efficiency, thermal</div>
+      <div class="stack-layer active">★ Cooling — water, energy, setpoints</div>
+      <div class="stack-layer active">★ Power — grid, carbon, renewables</div>
+      <div class="stack-layer active">★ Facility — community, justice</div>
+      <div class="stack-layer inactive">Networking · Silicon</div>
+    </div>
+    <div class="two-cols anim" style="margin-top:16px;max-width:700px">
+      <div>
+        <div class="col-title green-text">Today</div>
+        <ul class="bullet-list" style="font-size:15px">
+          <li>Monitoring, what-if, tradeoff enforcement</li>
+          <li>Power · Cooling · GPU · Facility</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title blue-text">Next</div>
+        <ul class="bullet-list" style="font-size:15px">
+          <li>↑ Workload scheduling by carbon intensity</li>
+          <li>↓ Hardware lifecycle / e-waste reduction</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 22 — ARCHITECTURE RECOMMENDATIONS ═══════════════ -->
+<div class="slide" data-slide="22">
+  <div class="slide-inner">
+    <div class="section-label anim">Impact & Proof</div>
+    <div class="slide-title anim">Energy-Efficient Data Center Architecture</div>
+    <div class="slide-sub anim" style="font-size:16px">What a digital twin validates before a dollar is spent</div>
+    <div class="card-grid cols-3 anim" style="margin-top:16px">
+      <div class="card" style="text-align:left">
+        <div class="card-label">Cooling</div>
+        <ul class="bullet-list" style="font-size:14px">
+          <li>Direct liquid cooling: <span class="stat">45% PUE improvement</span></li>
+          <li>Zero-water designs (Microsoft 2026)</li>
+          <li>Immersion: <span class="stat">50% ↓</span> cooling energy</li>
+        </ul>
+      </div>
+      <div class="card" style="text-align:left">
+        <div class="card-label">Power</div>
+        <ul class="bullet-list" style="font-size:14px">
+          <li>On-site renewable + storage</li>
+          <li>Carbon-aware load balancing: <span class="stat">5-15% ↓</span> carbon</li>
+          <li>Micro-grid: decouple from stressed grids</li>
+        </ul>
+      </div>
+      <div class="card" style="text-align:left">
+        <div class="card-label">Facility</div>
+        <ul class="bullet-list" style="font-size:14px">
+          <li>Modular prefab: months not years (<span class="stat">17.4% CAGR</span>)</li>
+          <li>Waste heat reuse → district heating</li>
+          <li>Low-carbon materials, circular construction</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout green anim" style="text-align:center;margin-top:16px">The twin tests all changes virtually — full sustainability tradeoff visibility before capital commitment.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 23 — SOFTWARE OPPORTUNITY ═══════════════ -->
+<div class="slide" data-slide="23">
+  <div class="slide-inner">
+    <div class="section-label anim">Impact & Proof</div>
+    <div class="hero-stat anim" style="font-size:clamp(40px,5.5vw,68px)">90 TWh/year</div>
+    <div class="slide-sub anim">Wasted globally <span class="orange-text">($9B)</span></div>
+    <div class="slide-sub anim" style="font-size:15px;margin-top:8px">Avg PUE <strong>1.58</strong> vs. best <strong>1.10</strong> = <strong>30% waste</strong>. 60-70% of the gap is software/ops.</div>
+    <table class="data-table anim" style="margin-top:16px">
+      <thead><tr><th>Lever</th><th>Impact</th></tr></thead>
+      <tbody>
+        <tr><td>ASHRAE cooling setpoints</td><td class="highlight">10-15% energy savings</td></tr>
+        <tr><td>AI-driven cooling</td><td class="highlight">+5-10% additional</td></tr>
+        <tr><td>Carbon-aware scheduling</td><td class="highlight">5-15% carbon reduction</td></tr>
+        <tr><td>Kill zombie servers (30% idle)</td><td class="highlight">5-15% IT energy</td></tr>
+      </tbody>
+    </table>
+    <div class="callout green anim" style="text-align:center">Composite: <strong>20-30% ↓ energy, 25-40% ↓ carbon</strong> — no hardware changes.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 24 — PROOF ═══════════════ -->
+<div class="slide" data-slide="24">
+  <div class="slide-inner">
+    <div class="section-label anim">Impact & Proof</div>
+    <div class="slide-title anim">Proven in the Real World</div>
+    <div class="card-grid cols-2 anim" style="margin-top:16px">
+      <div class="card glow-pulse">
+        <div class="card-stat green">40%</div>
+        <div class="card-label">↓ Cooling Energy</div>
+        <div class="card-detail">Google DeepMind (ML optimization)</div>
+      </div>
+      <div class="card">
+        <div class="card-stat green">50-60%</div>
+        <div class="card-label">↓ Cooling Cost</div>
+        <div class="card-detail">ASHRAE setpoint optimization (zero capex)</div>
+      </div>
+      <div class="card">
+        <div class="card-stat green">15-25%</div>
+        <div class="card-label">↓ Operational Cost</div>
+        <div class="card-detail">Digital twin deployments, 2 years (IDC 2024)</div>
+      </div>
+      <div class="card">
+        <div class="card-stat green">1.59 → 1.48</div>
+        <div class="card-label">PUE Improvement</div>
+        <div class="card-detail">Equinix, 260+ facilities</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 25 — THE 5% NUMBER ═══════════════ -->
+<div class="slide" data-slide="25">
+  <div class="slide-inner">
+    <div class="section-label anim">Impact & Proof</div>
+    <div class="hero-stat anim" style="font-size:clamp(36px,5vw,60px)">What if we fixed just 5%?</div>
+    <table class="data-table anim" style="margin-top:24px">
+      <thead><tr><th>Metric</th><th>Savings</th><th>Equivalent</th></tr></thead>
+      <tbody>
+        <tr><td>Electricity</td><td class="highlight">23-25 TWh/yr</td><td>Ireland's annual consumption</td></tr>
+        <tr><td>Carbon</td><td class="highlight">10-12.5M tonnes</td><td>2.5M cars off the road</td></tr>
+        <tr><td>Water</td><td class="highlight">75-120B liters/yr</td><td>Drinking water for 1.5M people</td></tr>
+        <tr><td>Cost</td><td class="highlight">$12.5-15B/yr</td><td>UN clean water initiative × 2 years</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 26 — REGULATORY TAILWIND ═══════════════ -->
+<div class="slide" data-slide="26">
+  <div class="slide-inner">
+    <div class="section-label anim">Context & Close</div>
+    <div class="slide-title anim">The Regulatory Tailwind</div>
+    <ul class="bullet-list anim" style="margin-top:16px">
+      <li><strong>EU Energy Efficiency Directive</strong> (2024): mandatory reporting, all DCs &gt;500 kW</li>
+      <li><strong>EU AI Act</strong>: training energy disclosure required</li>
+      <li><strong>Germany</strong>: PUE target <span class="stat">1.2 by 2027</span> (new builds)</li>
+      <li><strong>US</strong>: Oregon first mandatory reporting state; SEC climate rule advancing</li>
+      <li><strong>EU ETS</strong>: <span class="warn-stat">€80-100/tonne CO₂</span> — inefficiency has a direct cost</li>
+    </ul>
+    <div class="callout green anim" style="margin-top:20px">Voluntary action window closing. Compliance tools become essential.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 27 — THE QUOTE ═══════════════ -->
+<div class="slide" data-slide="27">
+  <div class="slide-inner section-divider" style="justify-content:center">
+    <div class="blockquote anim" style="font-size:clamp(22px,3.2vw,40px);max-width:900px">
+      We regulate factories that produce chemicals.<br>
+      We regulate factories that produce energy.<br>
+      We regulate factories that produce food.<br><br>
+      <span class="green-text">Why do we not regulate factories that produce intelligence?</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 28 — FUTURE VISION ═══════════════ -->
+<div class="slide" data-slide="28">
+  <div class="slide-inner">
+    <div class="section-label anim">Context & Close</div>
+    <div class="slide-title anim">Where This Goes</div>
+    <div class="roadmap anim" style="margin-top:16px">
+      <div class="roadmap-item">
+        <div class="roadmap-num">01</div>
+        <div><div class="roadmap-title">Real Telemetry</div><div class="roadmap-desc">Connect to DCIM/BMS (Schneider, Siemens)</div></div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-num">02</div>
+        <div><div class="roadmap-title">AI Nutrition Labels</div><div class="roadmap-desc">"This response: 12ml water, 0.3g CO₂"</div></div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-num">03</div>
+        <div><div class="roadmap-title">Community Dashboards</div><div class="roadmap-desc">Public impact visibility for neighborhoods</div></div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-num">04</div>
+        <div><div class="roadmap-title">Policy Integration</div><div class="roadmap-desc">Auto-compliance for EU EED, AI Act, SEC</div></div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-num">05</div>
+        <div><div class="roadmap-title">Multi-Site Optimization</div><div class="roadmap-desc">Portfolio-level twin across geographies</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 29 — WHAT WE BUILT & LEARNED ═══════════════ -->
+<div class="slide" data-slide="29">
+  <div class="slide-inner">
+    <div class="section-label anim">Context & Close</div>
+    <div class="slide-title anim">What We Built & What We Learned</div>
+    <div class="two-cols anim" style="margin-top:12px">
+      <div>
+        <div class="col-title green-text">Built</div>
+        <ul class="bullet-list" style="font-size:15px">
+          <li>Full-stack TypeScript monorepo — hackathon timeframe</li>
+          <li>Real-time 3D digital twin: React Three Fiber + WebSocket</li>
+          <li>Cross-layer dependency modeling, 5 infrastructure layers</li>
+          <li>Ethics-first architecture: tradeoff acknowledgment structurally enforced</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title blue-text">Learned</div>
+        <ul class="bullet-list" style="font-size:15px">
+          <li><strong>3D sync was new territory</strong> — 60fps interpolation from 2s ticks was our hardest problem</li>
+          <li><strong>Dependencies were harder than expected</strong> — full dependency graph rethink</li>
+          <li><strong>Ethics-first changed everything</strong> — shaped every architectural decision</li>
+          <li><strong>Domain deep-dive</strong> — PUE, thermodynamics, environmental justice</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout green anim" style="text-align:center;margin-top:16px">The hardest part isn't the technology — it's designing systems that refuse to let humans look away from consequences.</div>
+  </div>
+</div>
+
+<!-- ═══════════════ SLIDE 30 — CLOSE ═══════════════ -->
+<div class="slide" data-slide="30">
+  <div class="slide-inner section-divider" style="justify-content:center">
+    <div class="anim" style="width:60px;height:2px;background:var(--green);margin-bottom:40px;box-shadow:0 0 20px var(--green-glow)"></div>
+    <div class="anim" style="font-family:var(--font-display);font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1.4;max-width:800px">
+      <span style="color:var(--gray)">Every operational decision in an AI factory carries a hidden cost.</span>
+    </div>
+    <div class="anim" style="font-family:var(--font-display);font-size:clamp(22px,3vw,36px);font-weight:700;line-height:1.4;margin-top:16px;max-width:800px">
+      <span class="green-text">We make it visible, quantifiable, and undeniable.</span>
+    </div>
+    <div class="anim" style="margin-top:48px;display:flex;flex-direction:column;gap:8px;align-items:center">
+      <div style="font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--white)">[Team Names]</div>
+      <div style="font-family:var(--font-mono);font-size:13px;color:var(--gray);letter-spacing:1px">Built for the ShiftSC AI Ethics Hackathon</div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--dark-gray);margin-top:8px">[GitHub] · [Contact]</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar" id="progress"></div>
+<div class="slide-counter"><span class="current" id="currentSlide">01</span> / <span id="totalSlides">30</span></div>
+<div class="nav-hint">← → or SPACE to navigate</div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const progress = document.getElementById('progress');
+  const currentEl = document.getElementById('currentSlide');
+  let current = 0;
+
+  function go(n){
+    if(n<0||n>=total) return;
+    slides[current].classList.remove('active');
+    slides[current].classList.add(n > current ? 'prev' : '');
+    // Reset all anim classes on leaving slide
+    slides[current].querySelectorAll('.anim').forEach(el => {
+      el.style.animation = 'none';
+      el.offsetHeight; // reflow
+      el.style.animation = '';
+    });
+    current = n;
+    // Remove prev class from all
+    slides.forEach(s => s.classList.remove('prev'));
+    slides[current].classList.add('active');
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    currentEl.textContent = String(current + 1).padStart(2, '0');
+  }
+
+  document.addEventListener('keydown', e => {
+    if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown'){
+      e.preventDefault(); go(current + 1);
+    } else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp'){
+      e.preventDefault(); go(current - 1);
+    } else if(e.key === 'Home'){
+      e.preventDefault(); go(0);
+    } else if(e.key === 'End'){
+      e.preventDefault(); go(total - 1);
+    }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if(Math.abs(diff) > 50){
+      diff > 0 ? go(current + 1) : go(current - 1);
+    }
+  });
+
+  // Click sides to navigate
+  document.addEventListener('click', e => {
+    const x = e.clientX / window.innerWidth;
+    if(x > 0.75) go(current + 1);
+    else if(x < 0.25) go(current - 1);
+  });
+
+  // Init
+  progress.style.width = (1 / total * 100) + '%';
+})();
+</script>
+</body>
+</html>
